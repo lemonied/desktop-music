@@ -1,0 +1,56 @@
+@import "../../common/styles/variable";
+
+.glo-header{
+  height: 35px;
+  display: flex;
+  align-items: center;
+  background: #f3f3f3;
+  .app-icon{
+    flex: 1;
+    -webkit-app-region: drag;
+    padding: 0 0 0 10px;
+    display: flex;
+    align-items: center;
+    .logo{
+      width: 20px;
+    }
+  }
+  .user-name{
+    padding-right: 10px;
+    font-size: 12px;
+    .not-login{
+      &:hover{
+        cursor: pointer;
+        color: $primary-color;
+      }
+    }
+    .nick{
+      margin-left: 5px;
+    }
+  }
+  .operation{
+    display: flex;
+    align-items: center;
+    height: 100%;
+    & > div{
+      padding: 0 8px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color ease .2s;
+    }
+    .minimize{
+      &:hover{
+        background: #999999;
+        color: #ffffff;
+      }
+    }
+    .close{
+      &:hover{
+        background: $color-danger;
+        color: #ffffff;
+      }
+    }
+  }
+}

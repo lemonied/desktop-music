@@ -1,0 +1,102 @@
+@import "../../common/styles/variable";
+
+.windy-progress-outer{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  .windy-progress-inner{
+    flex: 1;
+    background-color: #f5f5f5;
+    .windy-progress-bg{
+      height: 100%;
+      background: $primary-color;
+      position: relative;
+      &.slow{
+        transition: all ease .3s;
+      }
+      .progress-btn-wrapper{
+        position: absolute;
+        left: 100%;
+        top: 50%;
+        width: 16px;
+        height: 16px;
+        transform: translate(-50%, -50%);
+        .progress-btn{
+          box-sizing: border-box;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background: $primary-color;
+        }
+        .progress-btn-circle{
+          position: absolute;
+          box-sizing: border-box;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 15px;
+          height: 15px;
+          border: 3px solid #ffffff;
+          border-radius: 50%;
+          z-index: 1;
+        }
+      }
+      @keyframes progress {
+        0%{
+          width: 0;
+          opacity: 1;
+        }
+        100%{
+          width: 100%;
+          opacity: 0;
+        }
+      }
+      &:after{
+        content: '';
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: rgba(255, 255, 255, .4);
+        animation: progress 2.4s cubic-bezier(.23,1,.32,1) infinite;
+      }
+    }
+  }
+  .windy-progress-after{
+    padding: 0 0 0 10px;
+    font-size: 14px;
+  }
+}
+.windy-circle-progress{
+  position: relative;
+  .circle-progress{
+    display: block;
+    .circle-trail{
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.3s ease 0s, stroke-dasharray 0.3s ease 0s, stroke 0.3s ease 0s, stroke-width 0.06s ease 0.3s;
+      stroke: #f5f5f5;
+    }
+    .circle-path{
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.3s ease 0s, stroke-dasharray 0.3s ease 0s, stroke 0.3s ease 0s, stroke-width 0.06s ease 0.3s;
+      stroke: $primary-color;
+    }
+  }
+  .windy-circle-progress-middle{
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    transform: translateY(-50%);
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+  }
+}
+.progress-container{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 5;
+}
