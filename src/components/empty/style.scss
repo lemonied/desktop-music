@@ -1,0 +1,14 @@
+.empty{
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  img{
+    width: 35%;
+  }
+  .desc{
+    padding-top: 20px;
+  }
+  transform: translateY(-20px);
+}

@@ -1,39 +1,68 @@
-import React, { FC, useEffect } from 'react';
-import './store/reducers';
-import { Structure } from '../../business/structure';
-import { http } from '../../helpers/http';
+import React, { FC, useEffect, useState } from 'react';
+import { Structure } from '../../components/structure';
+import { useRanks } from './store/reducers';
+import { useGetRanks } from './store/actions';
+import { Subscription } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { Content } from '../../business/content';
+import { Loading } from '../../components/loading';
+import './style.scss';
 
 interface Props {}
 
 const Home: FC<Props> = () => {
 
-  useEffect(() => {
-    http({
-      url: 'https://www.zghnrc.gov.cn/service/business/sms/sms/getContentList',
-      method: 'POST',
-      data: {
-        plateform: 1,
-        rowsNum: 20,
-        countsNum: 50,
-        channel_code: 'ZXDT'
-      },
-      headers: {
-        'Referer': 'https://zghnrc.gov.cn',
-        'Host': 'www.zghnrc.gov.cn',
-        'Origin': 'https://zghnrc.gov.cn'
-      }
-    }).subscribe(res => {
-      console.log(res);
-    });
-  }, []);
+  const ranks = useRanks();
+  const getRanks = useGetRanks();
+  const [loading, setLoading] = useState(false);
 
-  return (
-    <Structure>
-      {
-        new Array(50).fill(1).map((val, key) => (
-          <div key={key}>Content</div>
-        ))
+  useEffect(() => {
+    let subscription: Subscription;
+    if (!ranks.size) {
+      setLoading(true);
+      subscription = getRanks().pipe(
+        finalize(() => setLoading(false))
+      ).subscribe(res => console.log(res));
+    }
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
       }
+    };
+  }, [ranks, getRanks]);
+  if (loading && !ranks.size) {
+    return <Loading />;
+  }
+  return (
+    <Structure
+      className={'home'}
+    >
+      <Content className={'home-content'}>
+        {
+          ranks.map(item => {
+            return (
+              <div key={item.id} className={'rank'}>
+                <div className={'rank-wrapper'}>
+                  <div className={'poster'}>
+                    <img src={item.picUrl} alt={item.topTitle}/>
+                    <div className={'mask'} />
+                    <div className={'hot'}>人气:{item.listenCount}</div>
+                  </div>
+                  <ul className={'eg-songs'}>
+                    {
+                      item.songList.map((v: any, i: number) => {
+                        return (
+                          <li key={i} title={`${v.songname} - ${v.singername}`}>{v.songname} - {v.singername}</li>
+                        );
+                      })
+                    }
+                  </ul>
+                </div>
+              </div>
+            );
+          })
+        }
+      </Content>
     </Structure>
   );
 };

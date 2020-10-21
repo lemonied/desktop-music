@@ -1,38 +1,31 @@
 import React, { CSSProperties, FC, ReactNode } from 'react';
-import { Icon } from '../icon';
 import { combineClassNames } from '../../helpers/utils';
 import './style.scss';
+import { Spin } from 'antd';
+import { SpinSize } from 'antd/lib/spin';
 
 interface LoadingProps {
   title?: ReactNode;
   style?: CSSProperties;
-  icon?: ReactNode;
   className?: string;
+  size?: SpinSize;
 }
 
-const defaultProps: LoadingProps = {
-  style: { padding: '8px 0' }
-};
-
 const Loading: FC<LoadingProps> = function(props) {
-  const { title, style, icon, className } = props;
+  const { title, style, className, size = 'large' } = props;
   return (
-    <div className={combineClassNames('windy-loading', className)} style={ style }>
-      {
-        typeof icon === 'undefined' ?
-          <Icon type={'loading'} className={'loading-animation'} /> :
-          typeof icon === 'string' ?
-            <Icon type={icon} /> :
-            icon
-      }
+    <div
+      className={combineClassNames('spin-wrapper', className)}
+      style={style}
+    >
+      <Spin size={size} />
       {
         title ?
-          <span className={'title'}>{ title }</span> :
+          <span className={'spin-txt'}>{ title }</span> :
           null
       }
     </div>
   );
 };
-Loading.defaultProps = defaultProps;
 
 export { Loading };

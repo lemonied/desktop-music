@@ -2,7 +2,7 @@
   "id": "home",
   "name": "首页",
   "path": "/",
-  "order": -1,
-  "exact": true,
+  "order": 10000,
+  "exact": false,
   "enable": true
 }

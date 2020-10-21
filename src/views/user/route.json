@@ -1,0 +1,9 @@
+{
+  "id": "user",
+  "name": "用户中心",
+  "path": "/user",
+  "order": 1,
+  "exact": true,
+  "enable": true,
+  "auth": true
+}

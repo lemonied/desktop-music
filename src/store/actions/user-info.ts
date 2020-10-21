@@ -59,3 +59,10 @@ export const useLogin = () => {
     });
   }, [refreshUserInfo]);
 };
+export const useLogout = () => {
+  const refreshUserInfo = useRefreshUserInfo();
+  return useCallback(() => {
+    localStorage.removeItem(USER_INFO_EXTRA);
+    refreshUserInfo();
+  }, [refreshUserInfo]);
+};

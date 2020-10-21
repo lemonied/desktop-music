@@ -1,0 +1,47 @@
+@import "../../common/styles/variable";
+
+.aside{
+  width: 230px;
+  border-right: 2px solid $color-border;
+  padding: 0 20px 20px 20px;
+  font-size: 16px;
+  .logo{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    &:hover{
+      cursor: pointer;
+    }
+    img{
+      width: 35px;
+      margin-right: 5px;
+    }
+    h1{
+      color: $color-text;
+      font-size: 18px;
+    }
+  }
+  .aside-footer{
+    .user-name{
+      display: flex;
+      align-items: center;
+    }
+  }
+  .prefix{
+    margin-right: 10px;
+  }
+  .link{
+    color: $color-text-inactive;
+    -webkit-user-select: none;
+    &:hover{
+      color: $color-text;
+      cursor: pointer;
+    }
+    &.active{
+      color: $color-text;
+    }
+  }
+  .left-menu{
+    padding: 20px 0;
+  }
+}

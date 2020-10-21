@@ -1,0 +1,58 @@
+@import "../../common/styles/variable";
+@import "../../common/styles/mixin";
+
+.home{
+  .home-content{
+    display: flex;
+    flex-wrap: wrap;
+    .rank{
+      width: 33.33%;
+      padding: 15px;
+      * {
+        transition: all ease .2s;
+      }
+      .rank-wrapper{
+        background: $color-background-l;
+        border-radius: 8px;
+        overflow: hidden;
+        &:hover{
+          cursor: pointer;
+          box-shadow: 8px 8px 5px #000000;
+          transform: scale(1.05);
+          .mask{
+            background: rgba(0, 0, 0, 0);
+          }
+        }
+      }
+      .poster{
+        width: 100%;
+        position: relative;
+        img{
+          width: 100%;
+          display: block;
+        }
+        .mask{
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, .5);
+        }
+        .hot{
+          color: $color-text-inactive;
+          position: absolute;
+          right: 5px;
+          bottom: 5px;
+        }
+      }
+      .eg-songs{
+        li{
+          padding: 5px 10px;
+          color: $color-text-l;
+          @include no-wrap;
+        }
+      }
+    }
+  }
+}

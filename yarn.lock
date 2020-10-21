@@ -1222,13 +1222,6 @@
   resolved "https://registry.npm.taobao.org/@better-scroll/shared-utils/download/@better-scroll/shared-utils-2.0.4.tgz#4fc10e16fde42abfc8501ce1a521b05a862bc2e9"
   integrity sha1-T8EOFv3kKr/IUBzhpSGwWoYrwuk=
 
-"@better-scroll/slide@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.npm.taobao.org/@better-scroll/slide/download/@better-scroll/slide-2.0.4.tgz#a10eb0c3a6425f778336e18afa59ff7b48a39f8f"
-  integrity sha1-oQ6ww6ZCX3eDNuGK+ln/e0ijn48=
-  dependencies:
-    "@better-scroll/core" "^2.0.4"
-
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.npm.taobao.org/@cnakazawa/watch/download/@cnakazawa/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"

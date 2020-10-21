@@ -1,4 +1,5 @@
 const child_progress = require('child_process');
+const config = require('./main/config');
 const glob = require('glob');
 const { resolve, relative } = require('path');
 const fs = require('fs');
@@ -8,7 +9,7 @@ if (isProduction) {
   // production
   Object.assign(process.env, {
     'EXTEND_ESLINT': true,
-    'PUBLIC_URL': '/',
+    'PUBLIC_URL': './',
     'GENERATE_SOURCEMAP': false,
     'NODE_ENV': 'production'
   });
@@ -54,7 +55,8 @@ const routes = files.map(file => {
 
 Object.assign(process.env, {
   'REACT_APP_ROUTES': JSON.stringify(routes),
-  'REACT_APP_FEATURES': JSON.stringify(features)
+  'REACT_APP_FEATURES': JSON.stringify(features),
+  'REACT_APP_TITLE': config.title
 });
 
 const progress = child_progress.exec(isProduction ? 'craco build' : 'craco start');

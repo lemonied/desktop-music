@@ -1,13 +1,17 @@
 import React, { FC, useEffect } from 'react';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import { AsyncLoad } from './components/async-load';
 import { routes } from './routes';
 import './App.less';
-import { Structure } from './business/structure';
+import { Structure } from './components/structure';
 import { Header } from './business/header';
 import { useRefreshUserInfo } from './store/actions/user-info';
 import { useUserInfo } from './store/reducers/user-info';
-import { Spin } from 'antd';
+import { ConfigProvider } from 'antd';
+import { Aside } from './business/aside';
+import zhCN from 'antd/es/locale/zh_CN';
+import { NotCertified } from './business/not-certified';
+import { Loading } from './components/loading';
 
 const App: FC = () => {
   const refreshUserInfo = useRefreshUserInfo();
@@ -18,28 +22,34 @@ const App: FC = () => {
   }, [refreshUserInfo]);
 
   return (
-    <Structure
-      header={<Header />}
-      className={'root-container'}
-    >
-      {
-        userInfo.get('status') === -1 ?
-          <div className={'spin-wrapper'}>
-            <Spin size={'large'} />
-          </div> :
-          <BrowserRouter basename={process.env.PUBLIC_URL}>
+    <ConfigProvider locale={zhCN}>
+      <Structure
+        header={<Header />}
+        slider={
+          userInfo.get('status') === -1 ?
+            null :
+            <Aside />
+        }
+      >
+        {
+          userInfo.get('status') === -1 ?
+            <Loading /> :
             <Switch>
               {
                 routes.map(item => (
                   <Route exact={item.exact} path={item.path} key={item.path}>
-                    <AsyncLoad load={item.component}/>
+                    {
+                      userInfo.get('status') !== 1 && item.auth ?
+                        <NotCertified /> :
+                        <AsyncLoad load={item.component}/>
+                    }
                   </Route>
                 ))
               }
             </Switch>
-          </BrowserRouter>
-      }
-    </Structure>
+        }
+      </Structure>
+    </ConfigProvider>
   );
 };
 

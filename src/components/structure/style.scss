@@ -8,6 +8,10 @@
     display: flex;
     flex: 1;
     height: 100%;
+    overflow-y: auto;
+    aside{
+      height: 100%;
+    }
     .content-main{
       flex: 1;
       height: 100%;

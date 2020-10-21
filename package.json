@@ -10,7 +10,6 @@
     "@better-scroll/mouse-wheel": "^2.0.4",
     "@better-scroll/pull-up": "^2.0.4",
     "@better-scroll/scroll-bar": "^2.0.4",
-    "@better-scroll/slide": "^2.0.4",
     "@craco/craco": "^5.7.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
@@ -41,7 +40,8 @@
   },
   "scripts": {
     "start": "node develop.js --dev",
-    "open": "electron ."
+    "open": "set NODE_ENV=development&& electron .",
+    "prod": "node develop.js --prod"
   },
   "eslintConfig": {
     "extends": "react-app"

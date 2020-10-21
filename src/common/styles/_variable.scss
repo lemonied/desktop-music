@@ -1,12 +1,14 @@
 // 颜色定义规范
-$color-background: #ffffff;
-$color-background-active: #f2f2f2;
-$color-background-body: #fafafa;
+$color-background-l: rgb(39, 39, 39);
+$color-background-ll: rgb(89, 89, 89);
+$color-background-lll: rgb(206, 206, 206);
 $color-success: #52c41a;
 $color-danger: #ff4d4f;
 $color-warn: #faad14;
-$color-text: #333333;
-$color-border: #d9d9d9;
+$color-text: rgb(245, 245, 245);
+$color-text-l: rgb(225, 225, 225);
+$color-text-inactive: rgb(131, 131, 131);
+$color-border: rgb(38, 38, 38);
 
 // 字体定义规范
 $font-size-small-s: 10px;

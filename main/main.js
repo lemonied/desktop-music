@@ -1,14 +1,16 @@
 const { app, BrowserWindow, Tray, Menu } = require('electron');
 const path = require('path');
 const url = require('url');
+const config = require('./config');
+const colors = require('../src/styleVars');
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = process.env.NODE_ENV === 'development';
 let tray = null;
 
 async function createWindow () {
-  tray = new Tray(path.resolve(__dirname, './logo.png'));
+  tray = new Tray(config.icon);
   const win = new BrowserWindow({
-    width: 360,
+    width: 1020,
     height: 600,
     webPreferences: {
       nodeIntegration: true,
@@ -18,27 +20,29 @@ async function createWindow () {
     frame: false,
     show: true,
     resizable: false,
-    icon: path.resolve(__dirname, './logo.png')
+    icon: config.icon,
+    useContentSize: true,
+    backgroundColor: colors['color-background']
   });
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'QQ 音乐', type: 'normal', click: () => win.show() },
+    { label: config.title, type: 'normal', click: () => win.show() },
     { label: '退出', type: 'normal', click: () => app.quit() }
   ]);
-  tray.setToolTip('QQ 音乐');
+  tray.setToolTip(config.title);
   tray.setContextMenu(contextMenu);
   tray.on('click', () => win.show());
-  if (isProduction) {
-    await win.loadURL(url.format({
-      pathname: path.join(__dirname, 'index.html'),
-      protocol: 'file:',
-      slashes: true
-    }));
-  } else {
+  if (isDevelopment) {
     try {
       await win.loadURL('http://127.0.0.1:3333');
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (e) { console.error(e); }
+  } else {
+    try {
+      await win.loadURL(url.format({
+        pathname: path.join(__dirname, '../build/index.html'),
+        protocol: 'file:',
+        slashes: true
+      }));
+    } catch (e) { console.error(e); }
   }
   win.webContents.addListener('before-input-event', (e, input) => {
     if (input.type === 'keyDown' && input.code === 'F5') {
