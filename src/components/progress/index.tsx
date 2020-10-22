@@ -235,38 +235,3 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, LineProgressPro
   );
 };
 export const LineProgress = forwardRef(LineProgressFc);
-
-interface ProgressServiceOptions {
-  defaultPercent?: number;
-  height?: number;
-}
-export class ProgressService {
-  ele: Element | null = null;
-  instance = createRef<ProgressInstance>();
-
-  // 1 ~ 100
-  set(percent: number) {
-    this.instance.current?.setPercent(percent);
-  }
-  open(options: ProgressServiceOptions = {}) {
-    const { defaultPercent = 0, height = 2 } = options;
-    this.destroy();
-    const container = document.createElement('div');
-    container.className = 'progress-container';
-    document.body.appendChild(container);
-    ReactDOM.render(
-      <LineProgress percent={0} ref={this.instance} after={null} height={height} dot={false} />,
-      container,
-      () => setTimeout(() => this.set(defaultPercent))
-    );
-    this.ele = container;
-  }
-  destroy() {
-    if (this.ele) {
-      ReactDOM.unmountComponentAtNode(this.ele);
-      this.ele.remove();
-    }
-  }
-}
-
-export const progressBar = new ProgressService();

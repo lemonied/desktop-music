@@ -2,7 +2,7 @@ import { SET_BANNER, SET_RANKS } from './types';
 import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { get } from '../../../helpers/http';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 export const setBanner = (value: any[]) => {

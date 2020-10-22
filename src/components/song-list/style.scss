@@ -1,0 +1,7 @@
+@import "../../common/styles/variable";
+@import "../../common/styles/mixin";
+
+.songs-list-wrapper{
+  height: 100%;
+  overflow-y: auto;
+}

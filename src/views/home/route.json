@@ -1,8 +1,0 @@
-{
-  "id": "home",
-  "name": "首页",
-  "path": "/",
-  "order": 10000,
-  "exact": false,
-  "enable": true
-}

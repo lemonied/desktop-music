@@ -1,0 +1,56 @@
+@import "../../../common/styles/variable";
+@import "../../../common/styles/mixin";
+
+$width: 300px;
+
+.home-detail{
+  height: 100%;
+  width: $width;
+  overflow-y: auto;
+  .songs-list-header{
+    position: relative;
+    font-size: 18px;
+    padding: 10px 0;
+    .back{
+      position: absolute;
+      top: 50%;
+      left: 5px;
+      transform: translateY(-50%);
+      color: $color-chicken;
+      transition: all ease .3s;
+      font-size: 22px;
+      &:hover{
+        cursor: pointer;
+        transform: scale(1.05) translateY(-50%);
+      }
+    }
+    h1{
+      width: 80%;
+      text-align: center;
+      color: $color-chicken;
+      margin: 0 auto;
+      @include no-wrap;
+    }
+  }
+  &.width-enter {
+    opacity: 0;
+    width: 0;
+  }
+  &.width-enter-active {
+    opacity: 1;
+    width: $width;
+    transition: all ease 300ms;
+  }
+  &.width-enter-done{
+    width: $width;
+  }
+  &.width-exit {
+    width: $width;
+    opacity: 1;
+  }
+  &.width-exit-active {
+    opacity: 0;
+    width: 0;
+    transition: all ease 300ms;
+  }
+}

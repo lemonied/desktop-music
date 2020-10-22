@@ -1,5 +1,5 @@
 import React, { FC, Fragment, useMemo } from 'react';
-import { Structure } from '../../components/structure';
+import { Structure } from '../structure';
 import { UserOutlined } from '@ant-design/icons';
 import logo from '../../common/images/logo@2x.png';
 import './style.scss';
@@ -7,7 +7,7 @@ import { Avatar } from 'antd';
 import { useUserInfo } from '../../store/reducers/user-info';
 import { combineClassNames } from '../../helpers/utils';
 import { NavLink, Link, useHistory, useLocation } from 'react-router-dom';
-import { OrderedListOutlined } from '@ant-design/icons';
+import { HomeOutlined } from '@ant-design/icons';
 
 interface Props {}
 const Aside: FC<Props> = () => {
@@ -54,7 +54,7 @@ const Aside: FC<Props> = () => {
     >
       <div className={'left-menu'}>
         <Link to={'/'} className={combineClassNames('link', isHomeActive ? 'active' : null)}>
-          <OrderedListOutlined className={'prefix'} />
+          <HomeOutlined className={'prefix'} />
           <span>热门榜单</span>
         </Link>
       </div>

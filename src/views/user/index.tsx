@@ -6,7 +6,7 @@ import { useLogout } from '../../store/actions/user-info';
 import { LogoutOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { Modal } from '../../helpers/modal';
-import { Content } from '../../business/content';
+import { Content } from '../../components/content';
 
 interface Props {}
 const User: FC<Props> = () => {

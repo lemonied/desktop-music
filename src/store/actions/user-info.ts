@@ -19,7 +19,7 @@ export const pullUserInfo = (dispatch: Dispatch) => {
   if (extra) {
     const parsed = JSON.parse(extra);
     get(parsed.href).subscribe(res => {
-      if (res.code === 0 && res.base.code === 0 && res.base.data.code === 0) {
+      if (res?.code === 0 && res.base?.code === 0 && res.base.data?.code === 0) {
         const maps = res.base.data.map_userinfo;
         if (maps) {
           const info = maps[Object.keys(maps)[0]];

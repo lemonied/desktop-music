@@ -1,6 +1,6 @@
 import React, { FC, Fragment } from 'react';
 import { useLogin } from '../../store/actions/user-info';
-import { Empty } from '../../components/empty';
+import { Empty } from '../empty';
 import { Button } from 'antd';
 import './style.scss';
 
