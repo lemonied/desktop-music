@@ -103,34 +103,3 @@ export function combineClassNames(...args: (string | null | undefined)[]) {
 export function addClass(dom: HTMLElement, className: string) {
   dom.className = combineClassNames(dom.className, className);
 }
-
-const elementStyle = document.createElement('div').style;
-
-const vendor = (style: string) => {
-  const upStyle = style.charAt(0).toUpperCase() + style.substr(1);
-  const transformNames: any = {
-    standard: style,
-    webkit: `webkit${upStyle}`,
-    Moz: `Moz${upStyle}`,
-    O: `O${upStyle}`,
-    ms: `ms${upStyle}`
-  };
-
-  for (const key in transformNames) {
-    if (transformNames.hasOwnProperty(key) && typeof elementStyle[transformNames[key]] !== 'undefined') {
-      return key;
-    }
-  }
-
-  return false;
-};
-
-export function prefixStyle(style: string): string {
-  const prefix = vendor(style);
-
-  if (prefix === 'standard' || prefix === false) {
-    return style;
-  }
-
-  return prefix + style.charAt(0).toUpperCase() + style.substr(1);
-}

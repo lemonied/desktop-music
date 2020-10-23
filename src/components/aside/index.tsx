@@ -45,7 +45,7 @@ const Aside: FC<Props> = () => {
                 </Fragment> :
                 <Fragment>
                   <Avatar className={'prefix'} icon={<UserOutlined />} />
-                  <span>未登录</span>
+                  <span className={'not-login'}>未登录</span>
                 </Fragment>
             }
           </NavLink>

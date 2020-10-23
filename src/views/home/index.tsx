@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Structure } from '../../components/structure';
 import { useRanks } from './store/reducers';
 import { useGetRanks } from './store/actions';
@@ -7,7 +7,7 @@ import { finalize } from 'rxjs/operators';
 import { Content } from '../../components/content';
 import { Loading } from '../../components/loading';
 import { HomeDetail } from './detail';
-import { Route, Link, useLocation } from 'react-router-dom';
+import { Route, Link } from 'react-router-dom';
 import { CSSTransition } from 'react-transition-group';
 import './style.scss';
 import { Empty } from '../../components/empty';
@@ -19,11 +19,7 @@ const Home: FC<Props> = () => {
   const ranks = useRanks();
   const getRanks = useGetRanks();
   const [loading, setLoading] = useState(false);
-  const location = useLocation();
 
-  const isDetail = useMemo(() => {
-    return /^\/\d+$/.test(location.pathname);
-  }, [location]);
   useEffect(() => {
     let subscription: Subscription;
     if (!ranks.size) {
@@ -57,7 +53,7 @@ const Home: FC<Props> = () => {
               ranks.map(item => {
                 return (
                   <div key={item.id} className={'rank'}>
-                    <Link className={'rank-wrapper'} to={`/${item.id}`}>
+                    <Link className={'rank-wrapper'} to={`/${item.id}`} replace>
                       <div className={'poster'}>
                         <img src={item.picUrl} alt={item.topTitle}/>
                         <div className={'mask'} />

@@ -17,15 +17,15 @@ export const setUserInfo = (value: any) => {
 export const pullUserInfo = (dispatch: Dispatch) => {
   const extra = localStorage.getItem(USER_INFO_EXTRA);
   if (extra) {
-    const parsed = JSON.parse(extra);
-    get(parsed.href).subscribe(res => {
+    const { loginParams } = JSON.parse(extra);
+    get(loginParams.href).subscribe(res => {
       if (res?.code === 0 && res.base?.code === 0 && res.base.data?.code === 0) {
         const maps = res.base.data.map_userinfo;
         if (maps) {
           const info = maps[Object.keys(maps)[0]];
           if (info) {
             dispatch(
-              setUserInfo({ status: 1, qq: info.uni, nick: info.nick, avatar: info.headurl })
+              setUserInfo({ status: 1, qq: info.uin, nick: info.nick, avatar: info.headurl })
             );
             return;
           }
@@ -53,7 +53,7 @@ export const useRefreshUserInfo = () => {
 export const useLogin = () => {
   const refreshUserInfo = useRefreshUserInfo();
   return useCallback(() => {
-    login((res: any) => {
+    login().then((res: any) => {
       localStorage.setItem(USER_INFO_EXTRA, JSON.stringify(res));
       refreshUserInfo();
     });

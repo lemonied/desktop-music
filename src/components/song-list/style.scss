@@ -4,4 +4,21 @@
 .songs-list-wrapper{
   height: 100%;
   overflow-y: auto;
+  .songs-list{
+    *{
+      transition: all ease .3s;
+    }
+    li{
+      color: $color-text-l;
+      font-size: 14px;
+      padding: 3px 0;
+      &:hover{
+        cursor: pointer;
+        color: $color-text;
+      }
+      .title{
+        @include no-wrap;
+      }
+    }
+  }
 }

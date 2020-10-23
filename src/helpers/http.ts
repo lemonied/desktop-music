@@ -1,5 +1,6 @@
 import { deepMerge } from './utils';
 import { Observable } from 'rxjs';
+import { USER_INFO_EXTRA } from '../store/types';
 
 const { request } = (window as any).globalvars;
 
@@ -54,9 +55,30 @@ export function http(conf: RequestConfig | string): Observable<any> {
   });
 }
 
+const qqHeaders = () => {
+  return {
+    'origin': 'https://y.qq.com',
+    'referer': 'https://y.qq.com/',
+    'cookie': getCookies()
+  };
+};
+let cookies: string;
+const getCookies = (): string => {
+  if (cookies) {
+    return cookies;
+  }
+  const extra = localStorage.getItem(USER_INFO_EXTRA);
+  if (extra) {
+    cookies = JSON.parse(extra).cookies.map((v: any) => `${v.name}=${v.value};`).join('');
+    return cookies;
+  }
+  return '';
+};
 export function get(url: string, params?: any): Observable<any> {
-  return http({ method: 'GET', url, params });
+  const headers = qqHeaders();
+  return http({ method: 'GET', url, params, headers });
 }
 export function post(url: string, data?: any): Observable<any> {
-  return http({ method: 'POST', url, data });
+  const headers = qqHeaders();
+  return http({ method: 'POST', url, data, headers });
 }

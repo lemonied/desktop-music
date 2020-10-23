@@ -21,7 +21,7 @@ const HomeDetail: FC<Props> = () => {
   const getList = useCallback(() => {
     if (!id) { return; }
     setLoading(true);
-    get('https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg', {
+    return get('https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg', {
       inCharset: 'utf-8',
       outCharset: 'utf-8',
       notice: 0,
@@ -60,7 +60,12 @@ const HomeDetail: FC<Props> = () => {
   }, [id]);
 
   useEffect(() => {
-    getList();
+    const subscription = getList();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [getList]);
 
   return (
@@ -68,7 +73,7 @@ const HomeDetail: FC<Props> = () => {
       className={'home-detail'}
       header={
         <div className={'songs-list-header'}>
-          <RollbackOutlined className={'back'} onClick={() => history.go(-1)} />
+          <RollbackOutlined className={'back'} onClick={() => history.replace('/')} />
           <h1>{info?.name}</h1>
         </div>
       }

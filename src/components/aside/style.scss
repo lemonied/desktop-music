@@ -26,6 +26,10 @@
       display: flex;
       align-items: center;
     }
+    .not-login{
+      font-size: 12px;
+      color: $color-text-inactive;
+    }
   }
   .prefix{
     margin-right: 10px;
