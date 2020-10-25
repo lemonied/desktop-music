@@ -1,0 +1,28 @@
+@import "../../common/styles/variable";
+
+.mini-player{
+  padding: 10px;
+  border-top: solid 1px $color-border;
+  display: flex;
+  .previous-song,.next-song{
+    font-size: 20px;
+    color: $color-chicken-d;
+    &:hover{
+      cursor: pointer;
+      color: $color-chicken;
+    }
+  }
+  .mini-player-progress{
+    width: 35px;
+    color: $color-chicken-d;
+    &:hover{
+      cursor: pointer;
+      color: $color-chicken;
+    }
+    .windy-circle-progress-middle{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+}

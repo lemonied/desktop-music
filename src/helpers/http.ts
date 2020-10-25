@@ -78,7 +78,7 @@ export function get(url: string, params?: any): Observable<any> {
   const headers = qqHeaders();
   return http({ method: 'GET', url, params, headers });
 }
-export function post(url: string, data?: any): Observable<any> {
-  const headers = qqHeaders();
+export function post(url: string, data?: any, headers?: any): Observable<any> {
+  headers = Object.assign(qqHeaders(), headers || {});
   return http({ method: 'POST', url, data, headers });
 }

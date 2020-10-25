@@ -1,5 +1,4 @@
 import React, {
-  createRef,
   FC,
   forwardRef,
   ForwardRefRenderFunction,
@@ -12,7 +11,6 @@ import React, {
   useRef,
   useState
 } from 'react';
-import ReactDOM from 'react-dom';
 import { combineClassNames } from '../../helpers/utils';
 import './style.scss';
 

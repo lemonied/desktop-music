@@ -6,11 +6,11 @@
   overflow-y: auto;
   .songs-list{
     *{
-      transition: all ease .3s;
+      transition: all ease .2s;
     }
     li{
-      color: $color-text-l;
-      font-size: 14px;
+      color: $color-text-d;
+      font-size: 12px;
       padding: 3px 0;
       &:hover{
         cursor: pointer;

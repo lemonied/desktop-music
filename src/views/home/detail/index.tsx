@@ -37,7 +37,7 @@ const HomeDetail: FC<Props> = () => {
     }).pipe(
       finalize(() => setLoading(false))
     ).subscribe(res => {
-      if (res.code === 0) {
+      if (res.code === 0 && typeof res.total_song_num !== 'undefined') {
         setList(res.songlist.map((item: any) => {
           return {
             name: item.data.songname,

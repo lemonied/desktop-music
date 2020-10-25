@@ -12,6 +12,7 @@ import zhCN from 'antd/es/locale/zh_CN';
 import { NotCertified } from './components/not-certified';
 import { Loading } from './components/loading';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { Player } from './components/player';
 
 const App: FC = () => {
   const refreshUserInfo = useRefreshUserInfo();
@@ -37,6 +38,7 @@ const App: FC = () => {
             null :
             <Aside />
         }
+        footer={<Player />}
       >
         {
           userInfo.get('status') === -1 ?

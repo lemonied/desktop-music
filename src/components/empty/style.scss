@@ -1,3 +1,5 @@
+@import "../../common/styles/variable";
+
 .empty{
   display: flex;
   height: 100%;
@@ -9,6 +11,7 @@
   }
   .desc{
     padding-top: 20px;
+    color: $color-text-d;
   }
   transform: translateY(-20px);
 }

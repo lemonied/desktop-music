@@ -29,8 +29,8 @@
         display: block;
         &:hover{
           cursor: pointer;
-          box-shadow: 8px 8px 5px #000000;
-          transform: scale(1.05);
+          box-shadow: 5px 5px 3px #000000;
+          transform: scale(1.02);
           .mask{
             background: rgba(0, 0, 0, 0);
           }
@@ -61,7 +61,7 @@
       .eg-songs{
         li{
           padding: 5px 10px;
-          color: $color-text-l;
+          color: $color-text-d;
           @include no-wrap;
         }
       }

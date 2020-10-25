@@ -50,7 +50,7 @@ exports.request = (config, successFn, errorFn) => {
     errorFn(new Error('Timeout'));
   });
   if (config.data) {
-    const postData = qs.stringify(config.data);
+    const postData = typeof config.data === 'string' ? config.data : qs.stringify(config.data);
     req.setHeader('Content-Length', Buffer.byteLength(postData));
     req.write(postData);
   }
