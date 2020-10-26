@@ -1,28 +1,99 @@
 @import "../../common/styles/variable";
+@import "../../common/styles/mixin";
 
 .mini-player{
-  padding: 10px;
-  border-top: solid 1px $color-border;
-  display: flex;
-  .previous-song,.next-song{
-    font-size: 20px;
-    color: $color-chicken-d;
-    &:hover{
-      cursor: pointer;
-      color: $color-chicken;
+  @keyframes rotate {
+    0%{
+      transform: rotate(0deg);
+    }
+    100%{
+      transform: rotate(360deg);
     }
   }
-  .mini-player-progress{
-    width: 35px;
-    color: $color-chicken-d;
-    &:hover{
-      cursor: pointer;
-      color: $color-chicken;
+  padding: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-top: 1px solid $color-border;
+  .play-info{
+    display: flex;
+    align-items: center;
+    width: 180px;
+    .info{
+      padding: 0 0 0 10px;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+      .name{
+        color: $color-text;
+        @include no-wrap;
+      }
+      .desc{
+        color: $color-text-d;
+        @include no-wrap;
+      }
     }
-    .windy-circle-progress-middle{
+    .img{
+      width: 40px;
+      overflow: hidden;
+      img{
+        width: 100%;
+        border-radius: 50%;
+      }
+      &.play {
+        animation: rotate 10s linear infinite;
+      }
+      &.pause {
+        animation-play-state: paused;
+      }
+    }
+  }
+  .middle{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    .lyric-snapshot{
+      width: 100%;
+      @include no-wrap;
+      color: $color-text-d;
+      height: 20px;
+      text-align: center;
+    }
+    .progress-wrapper{
       display: flex;
       align-items: center;
-      justify-content: center;
+      color: $color-text-d;
+      width: 100%;
+      .progress{
+        flex: 1;
+      }
+      .now{
+        padding: 0 8px 0 0;
+      }
+      .duration{
+        padding: 0 0 0 8px;
+      }
+    }
+  }
+  .control{
+    display: flex;
+    padding: 0 0 0 20px;
+    .control-icon{
+      font-size: 28px;
+      color: $color-chicken;
+      padding: 0 5px;
+      &.loading{
+        color: $color-chicken-d;
+        &:hover{
+          cursor: default;
+        }
+      }
+      &:hover{
+        cursor: pointer;
+      }
     }
   }
 }

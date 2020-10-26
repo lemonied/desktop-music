@@ -74,14 +74,14 @@ const HomeDetail: FC<Props> = () => {
       header={
         <div className={'songs-list-header'}>
           <RollbackOutlined className={'back'} onClick={() => history.replace('/')} />
-          <h1>{info?.name}</h1>
+          <h1>{loading ? '加载中...' : info?.name}</h1>
         </div>
       }
     >
       {
         loading ?
           <Loading /> :
-          <SongList list={list} />
+          <SongList list={list} className={'home-detail-list'} />
       }
     </Structure>
   );

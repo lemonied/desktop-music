@@ -1,8 +1,6 @@
 import React, {
-  FC,
   forwardRef,
-  ForwardRefRenderFunction,
-  Fragment,
+  ForwardRefRenderFunction, MutableRefObject,
   ReactNode,
   useCallback,
   useEffect,
@@ -12,20 +10,15 @@ import React, {
   useState
 } from 'react';
 import { combineClassNames } from '../../helpers/utils';
+import { CSSTransition } from 'react-transition-group';
 import './style.scss';
-
-const DefaultAppend: FC<{percent: number;}> = function(props) {
-  const { percent = 0 } = props;
-  return (
-    <Fragment>{percent} %</Fragment>
-  );
-};
 
 interface ProgressProps {
   percent: number;
   className?: string;
-  trailColor?: string;
-  color?: string;
+  dot?: ReactNode;
+  wrapper?: MutableRefObject<any>;
+  onChange?: (percent: number) => void;
   progress?: ProgressInstance;
 }
 interface ProgressInstance {
@@ -35,87 +28,12 @@ export const useProgress = (): ProgressInstance => {
   const instance = useRef<ProgressInstance>({} as ProgressInstance);
   return instance.current;
 };
-interface CircleProgressProps extends ProgressProps {
-  type?: 'circle';
-  middle?: ReactNode;
-}
-const CircleProgressFc: ForwardRefRenderFunction<ProgressInstance, CircleProgressProps> = function(props, ref) {
-  const { percent, middle, className, trailColor, color, progress } = props;
-
-  const [ realPercent, setRealPercent ] = useState<number>(percent);
-
-  const instance = useMemo<ProgressInstance>(() => {
-    return {
-      setPercent: (percent?: number) => {
-        setRealPercent(percent || 0);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (typeof progress === 'object') {
-      Object.assign(progress, instance);
-    }
-  }, [progress, instance]);
-
-  useEffect(() => {
-    setRealPercent(percent);
-  }, [percent]);
-
-  useImperativeHandle(ref, () => {
-    return instance;
-  });
-
-  return (
-    <div className={combineClassNames('windy-circle-progress', className)}>
-      <svg className="circle-progress" viewBox="0 0 100 100">
-        <path
-          style={{ strokeDasharray: `${94 * 3.14}px, ${94 * 3.14}px` }}
-          className="circle-trail"
-          d="M 50,50 m 0,-47a 47,47 0 1 1 0,94a 47,47 0 1 1 0,-94"
-          strokeLinecap="round"
-          strokeWidth="6"
-          fillOpacity="0"
-          stroke={trailColor}
-        />
-        <path
-          style={{ strokeDasharray: `${94 * realPercent / 100 * 3.14}px, ${94 * 3.14}px` }}
-          className="circle-path"
-          d="M 50,50 m 0,-47a 47,47 0 1 1 0,94a 47,47 0 1 1 0,-94"
-          strokeLinecap="round"
-          strokeWidth="6"
-          opacity="1"
-          fillOpacity="0"
-          stroke={color}
-        />
-      </svg>
-      {
-        typeof middle === 'undefined' ?
-          <div className={'windy-circle-progress-middle'}>
-            <DefaultAppend percent={realPercent} />
-          </div> :
-          middle !== null ?
-            <div className={'windy-circle-progress-middle'}>{middle}</div> :
-            null
-      }
-    </div>
-  );
-};
-
-export const CircleProgress = forwardRef(CircleProgressFc);
-
-interface LineProgressProps extends ProgressProps {
-  type?: 'line';
-  after?: ReactNode;
-  height?: number;
-  dot?: boolean;
-  onChange?: (percent: number) => void;
-}
-const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, LineProgressProps> = function (props, ref) {
-  const { percent = 0, after, height = 5, className, trailColor, color, onChange, progress, dot = true } = props;
+const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, ProgressProps> = function (props, ref) {
+  const { percent = 0, className, onChange, progress, dot, wrapper } = props;
 
   const [ realPercent, setRealPercent ] = useState<number>(0);
   const [ slow, setSlow ] = useState<boolean>(true);
+  const [ active, setActive ] = useState<boolean>(false);
 
   const progressBarRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef({
@@ -153,15 +71,18 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, LineProgressPro
     }
   }, [onChange]);
 
-  const touchStart = useCallback((e: React.TouchEvent) => {
-    if (!dot) { return; }
+  const mouseDown = useCallback((e: React.MouseEvent) => {
+    if (dot === null) { return; }
     e.preventDefault();
     e.stopPropagation();
     setSlow(false);
     touchRef.current.status = true;
+    const barWidth = progressBarRef.current?.clientWidth || 0;
+    const offset = touchRef.current.offset = Math.min(e.pageX - (progressBarRef.current?.offsetLeft || 0), barWidth);
+    setRealPercent(offset / barWidth * 100);
   }, [dot]);
-  const touchMove = useCallback((e: React.TouchEvent) => {
-    if (!dot) { return; }
+  const mouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
+    if (dot === null) { return; }
     e.preventDefault();
     e.stopPropagation();
     if (!touchRef.current.status) {
@@ -169,15 +90,15 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, LineProgressPro
     }
     touchRef.current.isMove = true;
     const barWidth = progressBarRef.current?.clientWidth || 0;
-    const offset = touchRef.current.offset = Math.min(e.touches[0].pageX - (progressBarRef.current?.offsetLeft || 0), barWidth);
+    const offset = touchRef.current.offset = Math.min(e.pageX - (progressBarRef.current?.offsetLeft || 0), barWidth);
     setRealPercent(offset / barWidth * 100);
   }, [dot]);
-  const touchEnd = useCallback((e: React.TouchEvent) => {
-    if (!dot) { return; }
+  const mouseUp = useCallback((e: React.MouseEvent | MouseEvent) => {
+    if (dot === null) { return; }
     e.preventDefault();
     e.stopPropagation();
     const barWidth = progressBarRef.current?.clientWidth || 0;
-    if (!touchRef.current.isMove) {
+    if (!touchRef.current.status) {
       return;
     }
     touchRef.current.status = false;
@@ -185,50 +106,67 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, LineProgressPro
     handleChange(touchRef.current.offset / barWidth);
     setSlow(true);
   }, [handleChange, dot]);
-  const progressClick = useCallback((e: React.MouseEvent) => {
-    if (!dot) { return; }
-    e.preventDefault();
-    const barWidth = progressBarRef.current?.clientWidth || 0;
-    const offset = touchRef.current.offset = e.pageX - (progressBarRef.current?.offsetLeft || 0);
-    setRealPercent(offset / barWidth * 100);
-    handleChange(touchRef.current.offset / barWidth);
-  }, [handleChange, dot]);
+
+  const onMouseEnter = useCallback(() => {
+    setActive(true);
+  }, []);
+  const onMouseLeave = useCallback(() => {
+    setActive(false);
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mouseup', mouseUp);
+    return () => {
+      document.removeEventListener('mouseup', mouseUp);
+    };
+  }, [mouseUp]);
+  useEffect(() => {
+    document.addEventListener('mousemove', mouseMove);
+    return () => {
+      document.removeEventListener('mousemove', mouseMove);
+    };
+  }, [mouseMove]);
+  useEffect(() => {
+    const miniPlayer = wrapper?.current;
+    if (!miniPlayer) { return; }
+    miniPlayer.addEventListener('mouseenter', onMouseEnter);
+    miniPlayer.addEventListener('mouseleave', onMouseLeave);
+    return () => {
+      miniPlayer.removeEventListener('mouseenter', onMouseEnter);
+      miniPlayer.removeEventListener('mouseleave', onMouseLeave);
+    };
+  }, [onMouseEnter, onMouseLeave, wrapper]);
 
   return (
     <div
       className={combineClassNames('windy-progress-outer', className)}
-      onTouchStart={touchStart}
-      onTouchMove={touchMove}
-      onTouchEnd={touchEnd}
-      onClick={progressClick}
+      onMouseDown={mouseDown}
     >
       <div
         className={'windy-progress-inner'}
-        style={{height, backgroundColor: trailColor}}
         ref={progressBarRef}
       >
         <div
           className={combineClassNames('windy-progress-bg', slow ? 'slow' : null)}
-          style={{width: `${realPercent}%`, backgroundColor: color}}
+          style={{width: `${realPercent}%`}}
         >
-          {
-            dot ?
-              <div className={'progress-btn-wrapper'}>
-                <div className="progress-btn" />
-                <div className="progress-btn-circle" />
-              </div> :
-              null
-          }
+          <CSSTransition
+            timeout={300}
+            classNames={'scale'}
+            in={active}
+            unmountOnExit
+          >
+            {
+              typeof dot === 'undefined' ?
+                <div className={'progress-btn-wrapper'}>
+                  <div className="progress-btn" />
+                  <div className="progress-btn-circle" />
+                </div> :
+                dot
+            }
+          </CSSTransition>
         </div>
       </div>
-      {
-        typeof after === 'undefined' ?
-          <div className={'windy-progress-after'}>
-            <DefaultAppend percent={percent} />
-          </div> :
-          after
-      }
-
     </div>
   );
 };

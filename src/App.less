@@ -4,12 +4,29 @@
   height: 100%;
   overflow-y: auto;
   font-size: 12px;
+  position: relative;
+}
+.current-mask{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.3;
+  filter: blur(20px);
+  background-size: 100% auto;
+  background-position: center center;
+  transition: all ease .2s;
 }
 .root-routes-group{
   position: relative;
   height: 100%;
   width: 100%;
   overflow-y: auto;
+}
+.root-layout{
+  position: relative;
+  z-index: 1;
 }
 .fade-enter {
   opacity: 0;

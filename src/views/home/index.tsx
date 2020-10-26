@@ -4,7 +4,6 @@ import { useRanks } from './store/reducers';
 import { useGetRanks } from './store/actions';
 import { Subscription } from 'rxjs';
 import { finalize } from 'rxjs/operators';
-import { Content } from '../../components/content';
 import { Loading } from '../../components/loading';
 import { HomeDetail } from './detail';
 import { Route, Link } from 'react-router-dom';
@@ -47,7 +46,7 @@ const Home: FC<Props> = () => {
       className={'home'}
     >
       <div className={'home-wrapper'}>
-        <Content className={'home-content'}>
+        <div className={'home-content'}>
           <div className={'ranks-list'}>
             {
               ranks.map(item => {
@@ -74,7 +73,7 @@ const Home: FC<Props> = () => {
               })
             }
           </div>
-        </Content>
+        </div>
         <Route
           exact={false}
           path={'/:id'}

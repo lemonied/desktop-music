@@ -24,12 +24,13 @@
       }
       .rank-wrapper{
         background: $color-background-l;
+        border: 1px solid $color-border;
         border-radius: 5px;
         overflow: hidden;
         display: block;
         &:hover{
           cursor: pointer;
-          box-shadow: 5px 5px 3px #000000;
+          box-shadow: 5px 5px 3px rgba(0,0,0,.4);
           transform: scale(1.02);
           .mask{
             background: rgba(0, 0, 0, 0);

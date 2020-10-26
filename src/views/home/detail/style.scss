@@ -14,7 +14,7 @@ $width: 250px;
     .back{
       position: absolute;
       top: 50%;
-      left: 5px;
+      left: 10px;
       transform: translateY(-50%);
       color: $color-chicken;
       transition: all ease .3s;
@@ -32,6 +32,9 @@ $width: 250px;
       font-size: 16px;
       @include no-wrap;
     }
+  }
+  .home-detail-list{
+    padding: 0 15px;
   }
   &.width-enter {
     opacity: 0;

@@ -3,10 +3,12 @@ import './style.scss';
 import {
   useCurrentLyric,
   useCurrentSong,
+  useCurrentSongLoading,
   useCurrentSongPlaying,
   useDuration,
   useNow,
-  usePlayingList
+  usePlayingList,
+  usePlayMode
 } from './store/reducers';
 import { Observable, of, throwError, zip } from 'rxjs';
 import { get, post } from '../../helpers/http';
@@ -22,36 +24,68 @@ import {
   useSetNow
 } from './store/actions';
 import { Lyric } from './lyric';
-import { audioService } from './player';
+import { audioService, audioTimeFormat, getRandom } from './player';
 import { combineClassNames } from '../../helpers/utils';
-import { CircleProgress } from '../progress';
-import { Icon } from '../icon';
-import { FastBackwardOutlined, FastForwardOutlined } from '@ant-design/icons';
+import { LineProgress } from '../progress';
+import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
 
 const useNextSong = () => {
   const setCurrentSong = useSetCurrentSong();
   const playingList = usePlayingList();
   const currentSong = useCurrentSong();
+  const currentSongLoading = useCurrentSongLoading();
+  const playMode = usePlayMode();
   return useCallback(() => {
-    const index = playingList.findIndex(v => v === currentSong);
-    setCurrentSong(
-      playingList.get((index + 1) % playingList.size)
-    );
-  }, [playingList, setCurrentSong, currentSong]);
+    if (currentSongLoading) { return; }
+    if (playingList.size <= 0) { return; }
+    let index = playingList.findIndex(v => v === currentSong);
+    switch (playMode) {
+      case 'loop':
+        break;
+      case 'sequence':
+        index = (index + 1) % playingList.size;
+        break;
+      case 'random':
+        index = getRandom(index, playingList.size);
+        break;
+    }
+    const target = playingList.get(index);
+    if (target === currentSong) {
+      audioService.play();
+    } else {
+      setCurrentSong(target);
+    }
+
+  }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
 };
 const usePreviousSong = () => {
   const setCurrentSong = useSetCurrentSong();
   const playingList = usePlayingList();
   const currentSong = useCurrentSong();
+  const currentSongLoading = useCurrentSongLoading();
+  const playMode = usePlayMode();
   return useCallback(() => {
-    let index = playingList.findIndex(v => v === currentSong) - 1;
-    if (index < 0) {
-      index = playingList.size - 1;
+    if (currentSongLoading) { return; }
+    if (playingList.size <= 0) { return; }
+    let index = playingList.findIndex(v => v === currentSong);
+    switch (playMode) {
+      case 'random':
+        index = getRandom(index, playingList.size);
+        break;
+      case 'loop':
+        break;
+      case 'sequence':
+        index = index > 0 ?
+          index - 1 :
+          playingList.size - 1;
     }
-    setCurrentSong(
-      playingList.get(index)
-    );
-  }, [playingList, setCurrentSong, currentSong]);
+    const target = playingList.get(index);
+    if (target === currentSong) {
+      audioService.play();
+    } else {
+      setCurrentSong(index);
+    }
+  }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
 };
 
 const unescapeHTML = function(lrc: string){
@@ -66,7 +100,10 @@ interface PlayerProps {
 const Player: FC<PlayerProps> = function(props) {
   const { className } = props;
 
+  const miniPlayerRef = useRef<any>();
+  const lastOperationRef = useRef<'previous' | 'next'>();
   const currentSong = useCurrentSong();
+  const loading = useCurrentSongLoading();
   const setLoading = useSetCurrentSongLoading();
   const setPlaying = useSetCurrentSongPlaying();
   const lyricRef = useRef<Lyric>();
@@ -78,8 +115,8 @@ const Player: FC<PlayerProps> = function(props) {
   const playing = useCurrentSongPlaying();
   const now = useNow();
   const duration = useDuration();
-  const previous = usePreviousSong();
-  const next = useNextSong();
+  const previousSong = usePreviousSong();
+  const nextSong = useNextSong();
   const setVolume = useSetVolume();
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
@@ -131,6 +168,14 @@ const Player: FC<PlayerProps> = function(props) {
     return throwError(new Error('No CurrentSong'));
   }, [currentSong]);
 
+  const previous = useCallback(() => {
+    previousSong();
+    lastOperationRef.current = 'previous';
+  }, [previousSong]);
+  const next = useCallback(() => {
+    nextSong();
+    lastOperationRef.current = 'next';
+  }, [nextSong]);
   const togglePlay = useCallback(() => {
     if (playing) {
       audioService.pause();
@@ -138,6 +183,13 @@ const Player: FC<PlayerProps> = function(props) {
       audioService.play();
     }
   }, [playing]);
+  const onProgressChange = useCallback((percent: number) => {
+    audioService.currentTime = percent / 100 * duration;
+    lyricRef.current?.seek(audioService.currentTime * 1000);
+    if (!playing) {
+      lyricRef.current?.stop();
+    }
+  }, [duration, playing]);
 
   useEffect(() => {
     audioService.onplay = () => {
@@ -150,7 +202,16 @@ const Player: FC<PlayerProps> = function(props) {
     audioService.onvolumechange = (e: any) => {
       setVolume(e.target.volume);
     };
-  }, [setPlaying, setVolume]);
+    audioService.onerror = (e) => {
+      console.error(e);
+      setPlaying(false);
+      if (lastOperationRef.current === 'previous') {
+        previous();
+      } else {
+        next();
+      }
+    };
+  }, [setPlaying, setVolume, next, previous]);
   useEffect(() => {
     audioService.ontimeupdate = (e: any) => {
       if (currentSong) {
@@ -163,6 +224,11 @@ const Player: FC<PlayerProps> = function(props) {
       }
     };
   }, [currentSong, setNow]);
+  useEffect(() => {
+    audioService.onended = () => {
+      next();
+    };
+  }, [next]);
   useEffect(() => {
     setLoading(true);
     const subscription = getPlayInfo().pipe(
@@ -179,7 +245,6 @@ const Player: FC<PlayerProps> = function(props) {
       audioService.play().then(() => {
         lyricRef.current?.play();
       });
-      audioService.volume = 0.5;
     }, err => {
       console.error(err);
     });
@@ -192,26 +257,47 @@ const Player: FC<PlayerProps> = function(props) {
     return null;
   }
   return (
-    <div className={combineClassNames('mini-player', className)}>
-      <div className={'previous-song'} onClick={previous}>
-        <FastBackwardOutlined />
+    <div className={combineClassNames('mini-player', className)} ref={miniPlayerRef}>
+      <div className={'play-info'}>
+        <div className={combineClassNames('img', 'play', playing ? null : 'pause')}>
+          <img src={currentSong.get('image')} alt={currentSong.get('name')}/>
+        </div>
+        <div className={'info'}>
+          <div className={'name'} title={currentSong.get('name')}>{ currentSong.get('name') }</div>
+          <div className={'desc'} title={currentSong.get('singer')}>{ currentSong.get('singer') }</div>
+        </div>
       </div>
-      <div
-        className={'mini-player-progress'}
-        onClick={togglePlay}
-      >
-        <CircleProgress
-          className={''}
-          percent={now / duration * 100}
-          middle={
-            playing ? <Icon type={'pause'} className={'pause-icon'} /> : <Icon type={'play'} className={'play-icon'} />
+      <div className={'control'}>
+        <div className={'previous-song'} onClick={previous}>
+          <FastBackwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
+        </div>
+        <div
+          className={'toggle-play'}
+          onClick={togglePlay}
+        >
+          {
+            playing ?
+              <PauseOutlined className={'control-icon'} /> :
+              <CaretRightOutlined className={'control-icon'} />
           }
-        />
+        </div>
+        <div className={'next-song'} onClick={next}>
+          <FastForwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
+        </div>
       </div>
-      <div className={'next-song'} onClick={next}>
-        <FastForwardOutlined />
+      <div className={'middle'}>
+        <div className={'lyric-snapshot'} title={currentLyric}>{currentLyric}</div>
+        <div className={'progress-wrapper'}>
+          <div className={'now'}>{audioTimeFormat(now)}</div>
+          <LineProgress
+            percent={now / duration * 100}
+            className={'progress'}
+            wrapper={miniPlayerRef}
+            onChange={onProgressChange}
+          />
+          <div className={'duration'}>{audioTimeFormat(duration)}</div>
+        </div>
       </div>
-      <div>{currentLyric}</div>
     </div>
   );
 };

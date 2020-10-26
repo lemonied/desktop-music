@@ -6,9 +6,9 @@ export function audioTimeFormat(t = 0): string {
 }
 
 export function getRandom(current: number, total: number): number {
-  const random = Math.floor(Math.random() * total);
+  const random = Math.floor(Math.random() * (total - 1));
   if (random >= current) {
-    return random - 1;
+    return Math.min(random + 1, total - 1);
   }
   return random;
 }
