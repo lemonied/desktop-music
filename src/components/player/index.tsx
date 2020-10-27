@@ -1,13 +1,13 @@
 import React, { FC, useEffect, useCallback, useRef } from 'react';
 import './style.scss';
 import {
+  PlayModes,
   useCurrentLyric,
   useCurrentSong,
   useCurrentSongLoading,
   useCurrentSongPlaying,
   useDuration,
   useNow,
-  usePlayingList,
   usePlayMode
 } from './store/reducers';
 import { Observable, of, throwError, zip } from 'rxjs';
@@ -17,76 +17,19 @@ import {
   useSetVolume,
   useSetCurrentLyric,
   useSetCurrentLyricNum,
-  useSetCurrentSong,
   useSetCurrentSongLoading,
   useSetCurrentSongPlaying,
   useSetLyric,
-  useSetNow
+  useSetNow,
+  usePreviousSong,
+  useNextSong, useSetPlayMode
 } from './store/actions';
 import { Lyric } from './lyric';
-import { audioService, audioTimeFormat, getRandom } from './player';
+import { audioService, audioTimeFormat } from './player';
 import { combineClassNames } from '../../helpers/utils';
 import { LineProgress } from '../progress';
 import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
-
-const useNextSong = () => {
-  const setCurrentSong = useSetCurrentSong();
-  const playingList = usePlayingList();
-  const currentSong = useCurrentSong();
-  const currentSongLoading = useCurrentSongLoading();
-  const playMode = usePlayMode();
-  return useCallback(() => {
-    if (currentSongLoading) { return; }
-    if (playingList.size <= 0) { return; }
-    let index = playingList.findIndex(v => v === currentSong);
-    switch (playMode) {
-      case 'loop':
-        break;
-      case 'sequence':
-        index = (index + 1) % playingList.size;
-        break;
-      case 'random':
-        index = getRandom(index, playingList.size);
-        break;
-    }
-    const target = playingList.get(index);
-    if (target === currentSong) {
-      audioService.play();
-    } else {
-      setCurrentSong(target);
-    }
-
-  }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
-};
-const usePreviousSong = () => {
-  const setCurrentSong = useSetCurrentSong();
-  const playingList = usePlayingList();
-  const currentSong = useCurrentSong();
-  const currentSongLoading = useCurrentSongLoading();
-  const playMode = usePlayMode();
-  return useCallback(() => {
-    if (currentSongLoading) { return; }
-    if (playingList.size <= 0) { return; }
-    let index = playingList.findIndex(v => v === currentSong);
-    switch (playMode) {
-      case 'random':
-        index = getRandom(index, playingList.size);
-        break;
-      case 'loop':
-        break;
-      case 'sequence':
-        index = index > 0 ?
-          index - 1 :
-          playingList.size - 1;
-    }
-    const target = playingList.get(index);
-    if (target === currentSong) {
-      audioService.play();
-    } else {
-      setCurrentSong(index);
-    }
-  }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
-};
+import { Icon } from '../icon';
 
 const unescapeHTML = function(lrc: string){
   const t = document.createElement('div');
@@ -118,6 +61,8 @@ const Player: FC<PlayerProps> = function(props) {
   const previousSong = usePreviousSong();
   const nextSong = useNextSong();
   const setVolume = useSetVolume();
+  const playMode = usePlayMode();
+  const setPlayMode = useSetPlayMode();
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
     if (currentSong) {
@@ -160,7 +105,7 @@ const Player: FC<PlayerProps> = function(props) {
               const lrc = unescapeHTML(lyric.lyric);
               return of(lrc);
             }
-            return throwError(new Error('Fail to get lyric'));
+            return of('');
           })
         )
       );
@@ -186,10 +131,13 @@ const Player: FC<PlayerProps> = function(props) {
   const onProgressChange = useCallback((percent: number) => {
     audioService.currentTime = percent / 100 * duration;
     lyricRef.current?.seek(audioService.currentTime * 1000);
-    if (!playing) {
-      lyricRef.current?.stop();
-    }
-  }, [duration, playing]);
+  }, [duration]);
+  const changePlayMode = useCallback(() => {
+    const playModes: PlayModes[] = ['sequence', 'loop', 'random'];
+    setPlayMode(
+      playModes[(playModes.indexOf(playMode) + 1) % playModes.length]
+    );
+  }, [playMode, setPlayMode]);
 
   useEffect(() => {
     audioService.onplay = () => {
@@ -226,9 +174,13 @@ const Player: FC<PlayerProps> = function(props) {
   }, [currentSong, setNow]);
   useEffect(() => {
     audioService.onended = () => {
-      next();
+      if (playMode === 'loop') {
+        audioService.play();
+      } else {
+        next();
+      }
     };
-  }, [next]);
+  }, [next, playMode]);
   useEffect(() => {
     setLoading(true);
     const subscription = getPlayInfo().pipe(
@@ -297,6 +249,9 @@ const Player: FC<PlayerProps> = function(props) {
           />
           <div className={'duration'}>{audioTimeFormat(duration)}</div>
         </div>
+      </div>
+      <div className={'right'}>
+        <Icon type={playMode} className={'right-icon'} onClick={changePlayMode} />
       </div>
     </div>
   );

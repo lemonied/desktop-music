@@ -131,6 +131,15 @@ export class Lyric {
     clearTimeout(this.timer);
   }
   seek(offset: number) {
-    this.play(offset);
+    if (!this.lines.length) {
+      return;
+    }
+    this.curNum = this._findCurNum(offset);
+    this.startStamp = +new Date() - offset;
+    this._callHandler(this.curNum - 1);
+    if (this.curNum < this.lines.length && this.state === STATE_PLAYING) {
+      clearTimeout(this.timer);
+      this._playRest();
+    }
   }
 }

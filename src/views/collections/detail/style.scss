@@ -1,0 +1,25 @@
+.collections-detail{
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  &.slide-enter {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  &.slide-enter-active {
+    opacity: 1;
+    transform: translateX(0);
+    transition: all ease 300ms;
+  }
+  &.slide-exit {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  &.slide-exit-active {
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all ease 300ms;
+  }
+}

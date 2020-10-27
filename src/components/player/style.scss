@@ -80,7 +80,7 @@
   }
   .control{
     display: flex;
-    padding: 0 0 0 20px;
+    padding: 0 0 0 5px;
     .control-icon{
       font-size: 28px;
       color: $color-chicken;
@@ -91,6 +91,17 @@
           cursor: default;
         }
       }
+      &:hover{
+        cursor: pointer;
+      }
+    }
+  }
+  .right{
+    display: flex;
+    align-items: center;
+    .right-icon{
+      font-size: 30px;
+      color: $color-chicken;
       &:hover{
         cursor: pointer;
       }

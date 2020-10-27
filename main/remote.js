@@ -76,7 +76,7 @@ exports.login = async () => {
         if (Object.keys(rets).length >= 2) {
           return;
         }
-        if (/fcgi-bin\/fcg_user_created_diss/.test(listener.url)) {
+        if (/fcgi-bin\/fcg_get_profile_homepage/.test(listener.url)) {
           const parsed = url.parse(listener.url);
           if (parsed.host === 'c.y.qq.com') {
             rets.diss = parsed;

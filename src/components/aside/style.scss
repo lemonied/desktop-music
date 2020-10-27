@@ -1,7 +1,7 @@
 @import "../../common/styles/variable";
 
 .aside{
-  width: 220px;
+  width: 200px;
   border-right: 1px solid $color-border;
   padding: 0 20px 20px 20px;
   font-size: 16px;
@@ -47,5 +47,8 @@
   }
   .left-menu{
     padding: 20px 0 20px 20px;
+    li{
+      padding: 10px 0;
+    }
   }
 }

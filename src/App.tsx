@@ -25,6 +25,9 @@ const App: FC = () => {
     if (/^\/\d*$/.test(location.pathname)) {
       return '/';
     }
+    if (/^\/collections\/\d*$/.test(location.pathname)) {
+      return '/collections';
+    }
     return location.pathname;
   }, [location]);
   useEffect(() => {

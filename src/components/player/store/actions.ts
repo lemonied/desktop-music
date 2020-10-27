@@ -1,4 +1,12 @@
-import { PlayerStates, SongState, Song, PlayModes, usePlayingList } from './reducers';
+import {
+  PlayerStates,
+  SongState,
+  Song,
+  PlayModes,
+  usePlayingList,
+  useCurrentSong,
+  useCurrentSongLoading, usePlayMode
+} from './reducers';
 import {
   SET_CURRENT_LYRIC,
   SET_CURRENT_LYRIC_NUM,
@@ -16,6 +24,7 @@ import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
 import { fromJS, List } from 'immutable';
 import { LyricLine } from '../lyric';
+import { audioService, getRandom } from '../player';
 
 export const setPlayerInfo = (value: PlayerStates) => {
   return {
@@ -193,4 +202,61 @@ export const useSetVolume = () => {
       setVolume(volume)
     );
   }, [dispatch]);
+};
+export const useNextSong = () => {
+  const setCurrentSong = useSetCurrentSong();
+  const playingList = usePlayingList();
+  const currentSong = useCurrentSong();
+  const currentSongLoading = useCurrentSongLoading();
+  const playMode = usePlayMode();
+  return useCallback(() => {
+    if (currentSongLoading) { return; }
+    if (playingList.size <= 0) { return; }
+    let index = playingList.findIndex(v => v === currentSong);
+    switch (playMode) {
+      case 'loop':
+      case 'sequence':
+        index = (index + 1) % playingList.size;
+        break;
+      case 'random':
+        index = getRandom(index, playingList.size);
+        break;
+    }
+    const target = playingList.get(index);
+    if (target === currentSong) {
+      audioService.play();
+    } else {
+      setCurrentSong(target);
+    }
+
+  }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
+};
+export const usePreviousSong = () => {
+  const setCurrentSong = useSetCurrentSong();
+  const playingList = usePlayingList();
+  const currentSong = useCurrentSong();
+  const currentSongLoading = useCurrentSongLoading();
+  const playMode = usePlayMode();
+  return useCallback(() => {
+    if (currentSongLoading) { return; }
+    if (playingList.size <= 0) { return; }
+    let index = playingList.findIndex(v => v === currentSong);
+    switch (playMode) {
+      case 'random':
+        index = getRandom(index, playingList.size);
+        break;
+      case 'loop':
+      case 'sequence':
+        index = index > 0 ?
+          index - 1 :
+          playingList.size - 1;
+        break;
+    }
+    const target = playingList.get(index);
+    if (target === currentSong) {
+      audioService.play();
+    } else {
+      setCurrentSong(index);
+    }
+  }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
 };

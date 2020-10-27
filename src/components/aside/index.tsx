@@ -1,6 +1,6 @@
 import React, { FC, Fragment, useMemo } from 'react';
 import { Structure } from '../structure';
-import { UserOutlined } from '@ant-design/icons';
+import { StarOutlined, UserOutlined } from '@ant-design/icons';
 import logo from '../../common/images/logo@2x.png';
 import './style.scss';
 import { Avatar } from 'antd';
@@ -18,6 +18,9 @@ const Aside: FC<Props> = () => {
   const isHomeActive = useMemo<boolean>(() => {
     return location.pathname === '/' ||
       /^\/\d+$/.test(location.pathname);
+  }, [location]);
+  const isCollectionActive = useMemo<boolean>(() => {
+    return location.pathname.indexOf('/collections') === 0;
   }, [location]);
 
   return (
@@ -52,12 +55,20 @@ const Aside: FC<Props> = () => {
         </div>
       }
     >
-      <div className={'left-menu'}>
-        <Link to={'/'} className={combineClassNames('link', isHomeActive ? 'active' : null)}>
-          <HomeOutlined className={'prefix'} />
-          <span>热门榜单</span>
-        </Link>
-      </div>
+      <ul className={'left-menu'}>
+        <li>
+          <Link to={'/'} className={combineClassNames('link', isHomeActive ? 'active' : null)}>
+            <HomeOutlined className={'prefix'} />
+            <span>热门榜单</span>
+          </Link>
+        </li>
+        <li>
+          <Link to={'/collections'} className={combineClassNames('link', isCollectionActive ? 'active' : null)}>
+            <StarOutlined className={'prefix'} />
+            <span>我的歌单</span>
+          </Link>
+        </li>
+      </ul>
     </Structure>
   );
 };

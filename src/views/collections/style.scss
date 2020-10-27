@@ -1,0 +1,43 @@
+@import "../../common/styles/variable";
+@import "../../common/styles/mixin";
+
+.collections{
+  position: relative;
+  .title{
+    font-size: 18px;
+    text-align: center;
+    color: $color-chicken;
+  }
+  .cd-content{
+    transition: opacity ease .3s;
+  }
+  .cd-list{
+    .cd{
+      display: flex;
+      align-items: center;
+      padding: 5px;
+      .cover{
+        width: 80px;
+        img{
+          width: 100%;
+        }
+      }
+      .diss-name{
+        flex: 1;
+        width: 100%;
+        padding: 0 20px;
+        font-size: 14px;
+        display: block;
+        @include no-wrap;
+        color: $color-text;
+        &:hover{
+          color: $color-chicken;
+        }
+      }
+      .listen-count{
+        width: 20%;
+        white-space: pre;
+      }
+    }
+  }
+}
