@@ -1,7 +1,12 @@
 .windy-scroll-y-wrapper{
   height: 100%;
   position: relative;
+  overflow: hidden;
   .scroll-y{
     height: 100%;
+  }
+  .scroll-y-loading{
+    height: auto;
+    padding: 10px 0;
   }
 }

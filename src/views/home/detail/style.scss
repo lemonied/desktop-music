@@ -33,9 +33,6 @@ $width: 250px;
       @include no-wrap;
     }
   }
-  .home-detail-list{
-    padding: 0 15px;
-  }
   &.width-enter {
     opacity: 0;
     width: 0;

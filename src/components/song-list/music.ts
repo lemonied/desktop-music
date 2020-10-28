@@ -17,6 +17,9 @@ export interface Singer {
   avatar: string;
 }
 
-export const getImgByMid = (mid: string | number): string => {
+export const getImgByMid = (mid?: string | number): string => {
+  if (!mid) {
+    return 'https://y.gtimg.cn/mediastyle/music_v11/extra/default_300x300.jpg?max_age=31536000';
+  }
   return `https://y.gtimg.cn/music/photo_new/T002R300x300M000${mid}.jpg?max_age=2592000`;
 };

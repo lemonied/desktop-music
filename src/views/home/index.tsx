@@ -17,7 +17,7 @@ const Home: FC<Props> = () => {
 
   const ranks = useRanks();
   const getRanks = useGetRanks();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let subscription: Subscription;
@@ -26,6 +26,8 @@ const Home: FC<Props> = () => {
       subscription = getRanks().pipe(
         finalize(() => setLoading(false))
       ).subscribe();
+    } else {
+      setLoading(false);
     }
     return () => {
       if (subscription) {

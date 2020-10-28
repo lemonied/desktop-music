@@ -14,6 +14,7 @@ import { Loading } from './components/loading';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Player } from './components/player';
 import { useCurrentSong } from './components/player/store/reducers';
+import defaultBkg from './common/images/background.jpg';
 
 const App: FC = () => {
   const refreshUserInfo = useRefreshUserInfo();
@@ -36,7 +37,7 @@ const App: FC = () => {
 
   return (
     <Fragment>
-      <div className={'current-mask'} style={{backgroundImage: `url(${currentSong?.get('image')})`}} />
+      <div className={'current-mask'} style={{backgroundImage: `url(${currentSong?.get('image') || defaultBkg})`}} />
       <ConfigProvider locale={zhCN}>
         <Structure
           className={'root-layout'}

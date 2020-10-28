@@ -29,7 +29,10 @@ import { audioService, audioTimeFormat } from './player';
 import { combineClassNames } from '../../helpers/utils';
 import { LineProgress } from '../progress';
 import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
+import { EventManager } from '../../helpers/event';
 import { Icon } from '../icon';
+
+const playerEvent = new EventManager();
 
 const unescapeHTML = function(lrc: string){
   const t = document.createElement('div');
@@ -66,6 +69,10 @@ const Player: FC<PlayerProps> = function(props) {
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
     if (currentSong) {
+      const mid = currentSong.get('songmid');
+      if (!mid) {
+        return throwError(new Error('No Mid'));
+      }
       const data = JSON.stringify(
         {
           'req_0': {
@@ -73,7 +80,7 @@ const Player: FC<PlayerProps> = function(props) {
             'method': 'CgiGetVkey',
             'param': {
               'guid': '7500658880',
-              'songmid': [currentSong.get('songmid')],
+              'songmid': [mid],
               'songtype': [],
               'uin': '0',
               'loginflag': 0,
@@ -105,7 +112,7 @@ const Player: FC<PlayerProps> = function(props) {
               const lrc = unescapeHTML(lyric.lyric);
               return of(lrc);
             }
-            return of('');
+            return of('No Lyric');
           })
         )
       );
@@ -138,6 +145,15 @@ const Player: FC<PlayerProps> = function(props) {
       playModes[(playModes.indexOf(playMode) + 1) % playModes.length]
     );
   }, [playMode, setPlayMode]);
+  const onError = useCallback((e) => {
+    console.error(e);
+    setPlaying(false);
+    if (lastOperationRef.current === 'previous') {
+      previous();
+    } else {
+      next();
+    }
+  }, [previous, next, setPlaying]);
 
   useEffect(() => {
     audioService.onplay = () => {
@@ -151,15 +167,9 @@ const Player: FC<PlayerProps> = function(props) {
       setVolume(e.target.volume);
     };
     audioService.onerror = (e) => {
-      console.error(e);
-      setPlaying(false);
-      if (lastOperationRef.current === 'previous') {
-        previous();
-      } else {
-        next();
-      }
+      onError(e);
     };
-  }, [setPlaying, setVolume, next, previous]);
+  }, [onError, setPlaying, setVolume]);
   useEffect(() => {
     audioService.ontimeupdate = (e: any) => {
       if (currentSong) {
@@ -198,12 +208,22 @@ const Player: FC<PlayerProps> = function(props) {
         lyricRef.current?.play();
       });
     }, err => {
-      console.error(err);
+      setTimeout(() => {
+        playerEvent.emit('error', err);
+      }, 20);
     });
     return () => {
       subscription.unsubscribe();
     };
   }, [getPlayInfo, setLoading, setCurrentLyric, setCurrentLyricNum, setLyric]);
+  useEffect(() => {
+    const subscription = playerEvent.observe('error').subscribe(err => {
+      onError(err);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [onError]);
 
   if (!currentSong) {
     return null;

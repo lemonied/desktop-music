@@ -83,8 +83,6 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, ProgressProps> 
   }, [dot]);
   const mouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (dot === null) { return; }
-    e.preventDefault();
-    e.stopPropagation();
     if (!touchRef.current.status) {
       return;
     }
@@ -95,8 +93,6 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, ProgressProps> 
   }, [dot]);
   const mouseUp = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (dot === null) { return; }
-    e.preventDefault();
-    e.stopPropagation();
     const barWidth = progressBarRef.current?.clientWidth || 0;
     if (!touchRef.current.status) {
       return;

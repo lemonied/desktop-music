@@ -1,20 +1,37 @@
-import React, { FC, useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Structure } from '../../../components/structure';
 import './style.scss';
 import { get } from '../../../helpers/http';
-import { useRouteMatch } from 'react-router-dom';
+import { useRouteMatch, useLocation, Link } from 'react-router-dom';
 import { USER_INFO_EXTRA } from '../../../store/types';
 import { queryParse } from '../../../helpers/query';
-import { Observable, of } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { useUserInfo } from '../../../store/reducers/user-info';
-import { map } from 'rxjs/operators';
+import { finalize, map } from 'rxjs/operators';
+import { getImgByMid, Music } from '../../../components/song-list/music';
+import { SongList } from '../../../components/song-list';
+import { Loading } from '../../../components/loading';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+
+const PAGE_NUM = 50;
 
 const CollectionDetail: FC = () => {
   const match = useRouteMatch<{id: string}>();
+  const location = useLocation();
   const useInfo = useUserInfo();
+  const queryRef = useRef({
+    song_begin: 0,
+    song_num: PAGE_NUM,
+    song_total: 0
+  });
+  const [list, setList] = useState<Music[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState('');
   const id = match?.params?.id;
+  const search = location.search;
 
-  const getList = useCallback<() => Observable<any>>(() => {
+  const getList = useCallback<() => Observable<Music[]>>(() => {
     const storage = localStorage.getItem(USER_INFO_EXTRA);
     if (id && storage) {
       const parsed = queryParse(JSON.parse(storage).loginParams.query);
@@ -25,8 +42,8 @@ const CollectionDetail: FC = () => {
         onlysong: 1,
         nosign: 1,
         new_format: 1,
-        song_begin: 0,
-        song_num: 10,
+        song_begin: queryRef.current.song_begin,
+        song_num: queryRef.current.song_num,
         ctx: 1,
         disstid: id,
         _: Date.now(),
@@ -42,23 +59,75 @@ const CollectionDetail: FC = () => {
         needNewCode: 0
       }).pipe(
         map(res => {
-          console.log(res);
+          if (res.code === 0) {
+            queryRef.current.song_total = res.total_song_num;
+            setTotal(queryRef.current.song_total);
+            return res.songlist.map((item: any) => {
+              return {
+                name: item.name,
+                singer: item.singer?.map((v: any) => v.name).join(','),
+                album: item.album?.name,
+                vip: item.pay?.pay_play,
+                songmid: item.mid,
+                songid: item.id,
+                duration: item.interval,
+                image: getImgByMid(item.album?.mid)
+              };
+            });
+          }
+          return [];
         })
       );
     }
-    console.error(new Error('Prams parsed error'));
-    return of([]);
+    return throwError(new Error('Prams parsed error'));
   }, [id, useInfo]);
+  const onPullingUp = useCallback(() => {
+    const old = Object.assign({}, queryRef.current);
+    queryRef.current.song_num += PAGE_NUM;
+    queryRef.current.song_begin += PAGE_NUM;
+    getList().subscribe(res => {
+      setList(pre => pre.concat(res));
+    }, err => {
+      queryRef.current = old;
+      console.error(err);
+    });
+  }, [getList]);
 
   useEffect(() => {
-    getList().subscribe();
+    setLoading(true);
+    const subscription = getList().pipe(
+      finalize(() => setLoading(false))
+    ).subscribe(res => {
+      setList(res);
+    }, err => {
+      console.error(err);
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [getList]);
+  useEffect(() => {
+    const parsed = queryParse(search);
+    setTitle(decodeURIComponent(parsed.title));
+  }, [search]);
 
   return (
     <Structure
       className={'collections-detail'}
+      header={
+        <div className={'cd-detail-header'}>
+          <Link to={'/collections'} replace>
+            <ArrowLeftOutlined className={'back'} />
+          </Link>
+          <h1 className={'cd-title'}>{title}</h1>
+        </div>
+      }
     >
-      Hello World
+      {
+        loading ?
+          <Loading /> :
+          <SongList list={list} className={'cd-detail-list'} total={total} onPullingUp={onPullingUp} />
+      }
     </Structure>
   );
 };

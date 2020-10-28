@@ -1,9 +1,27 @@
+@import "../../../common/styles/variable";
 .collections-detail{
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
+  width: 100%;
+  height: 100%;
+  .cd-detail-header{
+    position: relative;
+    .back{
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      color: $color-chicken;
+      &:hover{
+        cursor: pointer;
+      }
+    }
+  }
+  .cd-detail-list{
+    padding: 20px;
+  }
   &.slide-enter {
     opacity: 0;
     transform: translateX(100%);

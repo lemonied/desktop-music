@@ -3,7 +3,7 @@
 
 .songs-list-wrapper{
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   .songs-list{
     *{
       transition: all ease .2s;
@@ -11,7 +11,7 @@
     li{
       color: $color-text-d;
       font-size: 14px;
-      padding: 3px 0;
+      padding: 5px 15px;
       display: flex;
       align-items: center;
       &:hover{

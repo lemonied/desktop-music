@@ -3,13 +3,15 @@
 
 .collections{
   position: relative;
-  .title{
+  .cd-content{
+    padding: 0 20px;
+  }
+  .cd-title{
     font-size: 18px;
     text-align: center;
     color: $color-chicken;
-  }
-  .cd-content{
-    transition: opacity ease .3s;
+    padding: 0 40px;
+    @include no-wrap;
   }
   .cd-list{
     .cd{
@@ -17,9 +19,17 @@
       align-items: center;
       padding: 5px;
       .cover{
-        width: 80px;
+        .cover-wrapper{
+          height: 0;
+          padding: 50% 0;
+          position: relative;
+          width: 80px;
+        }
         img{
           width: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
         }
       }
       .diss-name{
@@ -39,5 +49,19 @@
         white-space: pre;
       }
     }
+  }
+  .opacity-enter {
+    opacity: 0;
+  }
+  .opacity-enter-active {
+    opacity: 1;
+    transition: opacity ease 300ms;
+  }
+  .opacity-exit {
+    opacity: 1;
+  }
+  .opacity-exit-active {
+    opacity: 0;
+    transition: opacity ease 300ms;
   }
 }

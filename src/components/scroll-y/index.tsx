@@ -31,7 +31,7 @@ export interface ScrollYInstance {
   finishPullUp: () => void;
   refresh: () => void;
   closePullUp: () => void;
-  openPullUp: (option?: any) => void;
+  openPullUp: () => void;
   scrollTo: ExposedAPI['scrollTo'];
   scrollToElement: ExposedAPI['scrollToElement'];
 }
@@ -55,9 +55,9 @@ export interface ScrollYProps {
   scroll?: { [prop: string]: any };
   children?: ReactNode;
   data?: any;
-  scrollbar?: { fade: boolean; interactive: boolean; };
   className?: string;
   bounce?: boolean;
+  scrollBar?: boolean;
 }
 // check if event type exists
 function checkEventAndBind(scroll: BScroll, eventType: string, handler: (e: any) => void) {
@@ -71,37 +71,28 @@ function checkEventAndUnBind(scroll: BScroll, eventType: string, handler: (e: an
   }
 }
 // ScrollY Component
-const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance, ScrollYProps> = function (props, ref) {
+const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance | undefined, ScrollYProps> = function (props, ref) {
 
-  const { style, children, data, className, bounce = false } = props;
-  const { onScroll, onPullingUp, scroll, scrollbar } = props;
+  const { style, children, data, className, bounce = false, scrollBar = true } = props;
+  const { onScroll, onPullingUp, scroll } = props;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<BScroll>();
   const [ pullingUp, setPullingUp ] = useState<boolean>(false);
   const propsRef = useRef<ScrollYProps>(Object.assign({}, props));
-  const pullUpLoadConf = useMemo(() => {
-    return { threshold: 0 };
-  }, []);
-  const scrollBarConf = useMemo(() => {
-    if (typeof scrollbar === 'undefined') {
-      return {
-        fade: true,
-        interactive: false
-      };
-    }
-    return scrollbar;
-  }, [scrollbar]);
 
   // Create Scroller
   useEffect(() => {
     const { probeType = 1, onPullingUp } = propsRef.current;
     instanceRef.current = new BScroll(wrapperRef.current as HTMLElement, {
       scrollY: true,
-      click: true,
+      click: false,
       probeType,
-      pullUpLoad: onPullingUp ? pullUpLoadConf : undefined,
-      scrollbar: scrollBarConf,
+      pullUpLoad: onPullingUp ? true : undefined,
+      scrollbar: scrollBar ? {
+        fade: true,
+        interactive: false
+      } : undefined,
       mouseWheel: {
         speed: 20,
         invert: false,
@@ -112,7 +103,7 @@ const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance, ScrollYProps> = funct
     return function () {
       instanceRef.current?.destroy();
     };
-  }, [pullUpLoadConf, scrollBarConf, bounce]);
+  }, [bounce, scrollBar]);
   // onScroll
   useEffect(() => {
     const wrapper = instanceRef.current;
@@ -151,14 +142,20 @@ const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance, ScrollYProps> = funct
     };
     const finishPullUp = () => {
       setPullingUp(false);
-      instanceRef.current?.finishPullUp();
+      if (typeof instanceRef.current?.finishPullUp === 'function') {
+        instanceRef.current?.finishPullUp();
+      }
     };
     const closePullUp = () => {
       finishPullUp();
-      instanceRef.current?.closePullUp();
+      if (typeof instanceRef.current?.closePullUp === 'function') {
+        instanceRef.current?.closePullUp();
+      }
     };
-    const openPullUp = (option = pullUpLoadConf) => {
-      instanceRef.current?.openPullUp(option);
+    const openPullUp = () => {
+      if (typeof instanceRef.current?.openPullUp === 'function') {
+        instanceRef.current?.openPullUp();
+      }
     };
     return {
       finishPullUp,
@@ -172,7 +169,7 @@ const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance, ScrollYProps> = funct
         instanceRef.current?.scrollToElement(...args);
       }
     };
-  }, [pullUpLoadConf]);
+  }, []);
   // use instance
   useEffect(() => {
     if (scroll && typeof scroll === 'object') {
@@ -195,7 +192,7 @@ const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance, ScrollYProps> = funct
           { children }
           {
             pullingUp ?
-              <Loading title={'正在加载...'} size={'small'} /> :
+              <Loading title={'正在加载...'} size={'small'} className={'scroll-y-loading'} /> :
               null
           }
         </div>
@@ -204,4 +201,4 @@ const ScrollYFc: ForwardRefRenderFunction<ScrollYInstance, ScrollYProps> = funct
   );
 };
 
-export const ScrollY = forwardRef<ScrollYInstance, ScrollYProps>(ScrollYFc);
+export const ScrollY = forwardRef<ScrollYInstance | undefined, ScrollYProps>(ScrollYFc);
