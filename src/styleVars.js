@@ -1,4 +1,17 @@
-module.exports = {
-  'primary-color': '#40a9ff',
-  'color-background': '#121212'
-};
+module.exports = [{
+  value: '#40a9ff',
+  scss: ['primary-color'],
+  less: ['primary-color']
+}, {
+  value: '#121212',
+  scss: ['color-background'],
+  less: ['body-background']
+}, {
+  value: '#F5F5F5',
+  scss: ['color-text'],
+  less: ['text-color']
+}, {
+  value: 'rgba(59, 59, 59, .5)',
+  scss: [],
+  less: ['component-background']
+}];

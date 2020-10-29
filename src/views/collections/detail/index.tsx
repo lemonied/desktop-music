@@ -8,10 +8,11 @@ import { queryParse } from '../../../helpers/query';
 import { Observable, throwError } from 'rxjs';
 import { useUserInfo } from '../../../store/reducers/user-info';
 import { finalize, map } from 'rxjs/operators';
-import { getImgByMid, Music } from '../../../components/song-list/music';
+import { getImgByMid } from '../../../components/song-list/music';
 import { SongList } from '../../../components/song-list';
 import { Loading } from '../../../components/loading';
 import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Song } from '../../../components/player/store/reducers';
 
 const PAGE_NUM = 50;
 
@@ -24,14 +25,14 @@ const CollectionDetail: FC = () => {
     song_num: PAGE_NUM,
     song_total: 0
   });
-  const [list, setList] = useState<Music[]>([]);
+  const [list, setList] = useState<Song[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
   const id = match?.params?.id;
   const search = location.search;
 
-  const getList = useCallback<() => Observable<Music[]>>(() => {
+  const getList = useCallback<() => Observable<Song[]>>(() => {
     const storage = localStorage.getItem(USER_INFO_EXTRA);
     if (id && storage) {
       const parsed = queryParse(JSON.parse(storage).loginParams.query);
@@ -71,7 +72,8 @@ const CollectionDetail: FC = () => {
                 songmid: item.mid,
                 songid: item.id,
                 duration: item.interval,
-                image: getImgByMid(item.album?.mid)
+                image: getImgByMid(item.album?.mid),
+                url: item.url
               };
             });
           }

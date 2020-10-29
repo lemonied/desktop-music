@@ -7,7 +7,6 @@ interface UserInfo {
   qq?: string;
   nick?: string;
   avatar?: string;
-  favoriteId?: string;
 }
 type StateTypes = Record<UserInfo>;
 

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useCallback, useRef } from 'react';
+import React, { FC, useEffect, useCallback, useRef, useMemo } from 'react';
 import './style.scss';
 import {
   PlayModes,
@@ -8,11 +8,11 @@ import {
   useCurrentSongPlaying,
   useDuration,
   useNow,
-  usePlayMode
+  usePlayMode, useVolume
 } from './store/reducers';
 import { Observable, of, throwError, zip } from 'rxjs';
 import { get, post } from '../../helpers/http';
-import { concatMap, finalize } from 'rxjs/operators';
+import { catchError, concatMap, finalize } from 'rxjs/operators';
 import {
   useSetVolume,
   useSetCurrentLyric,
@@ -28,9 +28,12 @@ import { Lyric } from './lyric';
 import { audioService, audioTimeFormat } from './player';
 import { combineClassNames } from '../../helpers/utils';
 import { LineProgress } from '../progress';
-import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOutlined } from '@ant-design/icons';
+import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOutlined, SoundOutlined } from '@ant-design/icons';
 import { EventManager } from '../../helpers/event';
 import { Icon } from '../icon';
+import { VOLUME_SIZE } from './store/types';
+import { useGetFavorite, useSetFavoriteLoading } from '../../views/favorite/store/actions';
+import { useFavorites } from '../../views/favorite/store/reducers';
 
 const playerEvent = new EventManager();
 
@@ -46,7 +49,8 @@ interface PlayerProps {
 const Player: FC<PlayerProps> = function(props) {
   const { className } = props;
 
-  const miniPlayerRef = useRef<any>();
+  const middleRef = useRef<any>();
+  const rightRef = useRef<any>();
   const lastOperationRef = useRef<'previous' | 'next'>();
   const currentSong = useCurrentSong();
   const loading = useCurrentSongLoading();
@@ -63,35 +67,42 @@ const Player: FC<PlayerProps> = function(props) {
   const duration = useDuration();
   const previousSong = usePreviousSong();
   const nextSong = useNextSong();
+  const volume = useVolume();
   const setVolume = useSetVolume();
   const playMode = usePlayMode();
   const setPlayMode = useSetPlayMode();
+  const timerRef = useRef<any>();
+  const getFavorites = useGetFavorite();
+  const favorites = useFavorites();
+  const setFavoriteLoading = useSetFavoriteLoading();
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
     if (currentSong) {
+      clearTimeout(timerRef.current);
       const mid = currentSong.get('songmid');
-      if (!mid) {
-        return throwError(new Error('No Mid'));
-      }
-      const data = JSON.stringify(
-        {
-          'req_0': {
-            'module': 'vkey.GetVkeyServer',
-            'method': 'CgiGetVkey',
-            'param': {
-              'guid': '7500658880',
-              'songmid': [mid],
-              'songtype': [],
-              'uin': '0',
-              'loginflag': 0,
-              'platform': '23',
-              'h5to': 'speed'
-            }
-          }, 'comm': {'uin': 0, 'format': 'json', 'ct': 23, 'cv': 0}
-        }
-      );
-      return zip(
-        post(`https://u.y.qq.com/cgi-bin/musicu.fcg?_=${Date.now()}`, data, {
+      const url = currentSong.get('url');
+      let playUrl: Observable<string>;
+      if (!mid && url) {
+        playUrl = of(url);
+      } else {
+        const data = JSON.stringify(
+          {
+            'req_0': {
+              'module': 'vkey.GetVkeyServer',
+              'method': 'CgiGetVkey',
+              'param': {
+                'guid': '7500658880',
+                'songmid': [mid],
+                'songtype': [],
+                'uin': '0',
+                'loginflag': 0,
+                'platform': '23',
+                'h5to': 'speed'
+              }
+            }, 'comm': {'uin': 0, 'format': 'json', 'ct': 23, 'cv': 0}
+          }
+        );
+        playUrl = post(`https://u.y.qq.com/cgi-bin/musicu.fcg?_=${Date.now()}`, data, {
           'Content-Type': 'application/json; charset=UTF-8',
           'referer': 'https://u.y.qq.com',
           'origin': 'https://u.y.qq.com'
@@ -103,7 +114,11 @@ const Player: FC<PlayerProps> = function(props) {
             }
             return throwError(new Error('Fail to get play url'));
           })
-        ),
+        );
+      }
+
+      return zip(
+        playUrl,
         get(`https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?uin=0&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=h5&needNewCode=1&nobase64=1&musicid=${currentSong.get('songid')}&songtype=0&_=${Date.now()}`).pipe(
           concatMap(res => {
             // eslint-disable-next-line no-eval
@@ -148,12 +163,21 @@ const Player: FC<PlayerProps> = function(props) {
   const onError = useCallback((e) => {
     console.error(e);
     setPlaying(false);
-    if (lastOperationRef.current === 'previous') {
-      previous();
-    } else {
-      next();
-    }
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (lastOperationRef.current === 'previous') {
+        previous();
+      } else {
+        next();
+      }
+    }, 500);
   }, [previous, next, setPlaying]);
+  const onVolumeChange = useCallback((volume: number) => {
+    audioService.volume = Math.min(Math.max(volume / 100, 0), 1);
+  }, []);
+  const isFavorite = useMemo(() => {
+    return favorites.findIndex(v => v.songid === currentSong?.get('songid')) > -1;
+  }, [currentSong, favorites]);
 
   useEffect(() => {
     audioService.onplay = () => {
@@ -164,6 +188,7 @@ const Player: FC<PlayerProps> = function(props) {
       lyricRef.current?.stop();
     };
     audioService.onvolumechange = (e: any) => {
+      localStorage.setItem(VOLUME_SIZE, e.target.volume);
       setVolume(e.target.volume);
     };
     audioService.onerror = (e) => {
@@ -225,11 +250,22 @@ const Player: FC<PlayerProps> = function(props) {
     };
   }, [onError]);
 
+  useEffect(() => {
+    setFavoriteLoading(true);
+    getFavorites().pipe(
+      finalize(() => setFavoriteLoading(false)),
+      catchError(err => {
+        console.error(err);
+        return of();
+      })
+    ).subscribe();
+  }, [getFavorites, setFavoriteLoading]);
+
   if (!currentSong) {
     return null;
   }
   return (
-    <div className={combineClassNames('mini-player', className)} ref={miniPlayerRef}>
+    <div className={combineClassNames('mini-player', className)}>
       <div className={'play-info'}>
         <div className={combineClassNames('img', 'play', playing ? null : 'pause')}>
           <img src={currentSong.get('image')} alt={currentSong.get('name')}/>
@@ -239,7 +275,11 @@ const Player: FC<PlayerProps> = function(props) {
           <div className={'desc'} title={currentSong.get('singer')}>{ currentSong.get('singer') }</div>
         </div>
       </div>
+
       <div className={'control'}>
+        <div className={'mode'}>
+          <Icon type={playMode} className={'control-icon mode-icon'} onClick={changePlayMode} />
+        </div>
         <div className={'previous-song'} onClick={previous}>
           <FastBackwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
         </div>
@@ -257,21 +297,38 @@ const Player: FC<PlayerProps> = function(props) {
           <FastForwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
         </div>
       </div>
-      <div className={'middle'}>
+      <div className={'middle'} ref={middleRef}>
         <div className={'lyric-snapshot'} title={currentLyric}>{currentLyric}</div>
         <div className={'progress-wrapper'}>
           <div className={'now'}>{audioTimeFormat(now)}</div>
           <LineProgress
-            percent={now / duration * 100}
+            percent={duration ? now / duration * 100 : 0}
             className={'progress'}
-            wrapper={miniPlayerRef}
+            wrapper={middleRef}
             onChange={onProgressChange}
           />
           <div className={'duration'}>{audioTimeFormat(duration)}</div>
         </div>
       </div>
-      <div className={'right'}>
-        <Icon type={playMode} className={'right-icon'} onClick={changePlayMode} />
+      <div className={'right'} ref={rightRef}>
+        <Icon
+          type={isFavorite ? 'favorite' : 'not-favorite'}
+          className={isFavorite ? 'favorite' : 'not-favorite'}
+        />
+        <div className={'volume'}>
+          <SoundOutlined className={'volume-icon'} />
+          <LineProgress
+            percent={volume * 100}
+            className={'volume-progress'}
+            wrapper={rightRef}
+            onChange={onVolumeChange}
+            dot={
+              <div className={'volume-dot'} />
+            }
+            realTime
+          />
+          <div className={'volume-num'}>{Math.floor(volume * 100)}</div>
+        </div>
       </div>
     </div>
   );

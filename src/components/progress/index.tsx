@@ -20,6 +20,7 @@ interface ProgressProps {
   wrapper?: MutableRefObject<any>;
   onChange?: (percent: number) => void;
   progress?: ProgressInstance;
+  realTime?: boolean;
 }
 interface ProgressInstance {
   setPercent: (percent?: number) => void;
@@ -29,7 +30,7 @@ export const useProgress = (): ProgressInstance => {
   return instance.current;
 };
 const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, ProgressProps> = function (props, ref) {
-  const { percent = 0, className, onChange, progress, dot, wrapper } = props;
+  const { percent = 0, className, onChange, progress, dot, wrapper, realTime = false } = props;
 
   const [ realPercent, setRealPercent ] = useState<number>(0);
   const [ slow, setSlow ] = useState<boolean>(true);
@@ -59,7 +60,7 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, ProgressProps> 
   }, [instance, progress]);
 
   useEffect(() => {
-    if (touchRef.current.isMove) {
+    if (touchRef.current.status) {
       return;
     }
     setRealPercent(percent);
@@ -71,26 +72,31 @@ const LineProgressFc: ForwardRefRenderFunction<ProgressInstance, ProgressProps> 
     }
   }, [onChange]);
 
+  const getOffset = (e: React.MouseEvent | MouseEvent) => {
+    const barWidth = progressBarRef.current?.clientWidth || 0;
+    const offset = touchRef.current.offset = Math.min(e.pageX - (progressBarRef.current?.offsetLeft || 0), barWidth);
+    return { barWidth, offset };
+  };
   const mouseDown = useCallback((e: React.MouseEvent) => {
     if (dot === null) { return; }
     e.preventDefault();
     e.stopPropagation();
     setSlow(false);
     touchRef.current.status = true;
-    const barWidth = progressBarRef.current?.clientWidth || 0;
-    const offset = touchRef.current.offset = Math.min(e.pageX - (progressBarRef.current?.offsetLeft || 0), barWidth);
+    const { barWidth, offset } = getOffset(e);
     setRealPercent(offset / barWidth * 100);
-  }, [dot]);
+    if (realTime) { handleChange(touchRef.current.offset / barWidth); }
+  }, [dot, handleChange, realTime]);
   const mouseMove = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (dot === null) { return; }
     if (!touchRef.current.status) {
       return;
     }
     touchRef.current.isMove = true;
-    const barWidth = progressBarRef.current?.clientWidth || 0;
-    const offset = touchRef.current.offset = Math.min(e.pageX - (progressBarRef.current?.offsetLeft || 0), barWidth);
+    const { barWidth, offset } = getOffset(e);
     setRealPercent(offset / barWidth * 100);
-  }, [dot]);
+    if (realTime) { handleChange(touchRef.current.offset / barWidth); }
+  }, [dot, handleChange, realTime]);
   const mouseUp = useCallback((e: React.MouseEvent | MouseEvent) => {
     if (dot === null) { return; }
     const barWidth = progressBarRef.current?.clientWidth || 0;

@@ -2,16 +2,17 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import './style.scss';
 import { get } from '../../../helpers/http';
-import { getImgByMid, Music } from '../../../components/song-list/music';
+import { getImgByMid } from '../../../components/song-list/music';
 import { SongList } from '../../../components/song-list';
 import { finalize, tap } from 'rxjs/operators';
 import { Loading } from '../../../components/loading';
 import { Structure } from '../../../components/structure';
 import { CloseOutlined } from '@ant-design/icons';
+import { Song } from '../../../components/player/store/reducers';
 
 interface Props {}
 const HomeDetail: FC<Props> = () => {
-  const [list, setList] = useState<Music[]>([]);
+  const [list, setList] = useState<Song[]>([]);
   const [info, setInfo] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
   const match = useRouteMatch<{id: string}>();
@@ -42,7 +43,7 @@ const HomeDetail: FC<Props> = () => {
               name: item.data.songname,
               singer: item.data.singer.map((val: any) => val.name).join(','),
               album: item.data.albumname,
-              vip: !!item.data.pay.payplay,
+              vip: !!item.data.pay?.payplay,
               songmid: item.data.songmid,
               songid: item.data.songid,
               duration: item.data.interval,

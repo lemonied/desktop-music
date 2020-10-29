@@ -6,10 +6,10 @@ const colors = require('../src/styleVars');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 let tray = null;
-
+const mainInfo = {};
 async function createWindow () {
   tray = new Tray(config.icon);
-  const win = new BrowserWindow({
+  const win = mainInfo.win =  new BrowserWindow({
     width: 1020,
     height: 600,
     webPreferences: {
@@ -55,3 +55,5 @@ async function createWindow () {
 }
 
 app.whenReady().then(createWindow);
+
+exports.mainInfo = mainInfo;

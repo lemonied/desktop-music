@@ -4,13 +4,13 @@ const url = require('url');
 const qs = require('querystring');
 const zlib = require('zlib');
 const { app, BrowserWindow } = require('electron');
+const { mainInfo } = require('./main');
 
 const buildQuery = (parsedUrl, params) => {
   const merged = Object.assign(qs.parse(parsedUrl.query), params);
   return qs.stringify(merged);
 };
-
-exports.request = (config, successFn, errorFn) => {
+const req = (config, successFn, errorFn, beforeRequest = Promise.resolve) => {
   let end = false;
   const parsedUrl = url.parse(config.url);
   const req = (parsedUrl.protocol === 'https:' ? https : http).request({
@@ -36,7 +36,7 @@ exports.request = (config, successFn, errorFn) => {
     });
     res.on('end', () => {
       end = true;
-      successFn(data);
+      successFn(data, resHeaders);
     });
   });
   req.on('error', error => {
@@ -49,15 +49,50 @@ exports.request = (config, successFn, errorFn) => {
   req.on('timeout', () => {
     errorFn(new Error('Timeout'));
   });
-  if (config.data) {
-    const postData = typeof config.data === 'string' ? config.data : qs.stringify(config.data);
-    req.setHeader('Content-Length', Buffer.byteLength(postData));
-    req.write(postData);
-  }
-  req.end();
+  beforeRequest().then((h) => {
+    if (typeof h === 'object') {
+      Object.keys(h).forEach(key => {
+        req.setHeader(key.toLowerCase(), h[key]);
+      });
+    }
+    if (config.data) {
+      const postData = typeof config.data === 'string' ? config.data : qs.stringify(config.data);
+      req.setHeader('Content-Length', Buffer.byteLength(postData));
+      req.write(postData);
+    }
+    req.end();
+  }).catch((e) => {
+    console.error(e);
+  });
   return () => {
     req.abort();
   };
+};
+
+exports.req = req;
+exports.request = (config, successFn, errorFn) => {
+  return req(config, (data, headers) => {
+    successFn(data);
+  }, errorFn, async () => {
+    const cookies = await mainInfo.win.webContents.session.cookies.get({
+      url: 'https://c.y.qq.com'
+    }) || [];
+    return {
+      'cookie': cookies.map(v => `${v.name}=${v.value}`).join(';'),
+      'origin': 'https://y.qq.com',
+      'referer': 'https://y.qq.com/',
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'Accept-Encoding': 'gzip',
+      'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Pragma': 'no-cache',
+      'Sec-Fetch-Dest': 'empty',
+      'Sec-Fetch-Mode': 'cors',
+      'Sec-Fetch-Site': 'same-site',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36'
+    };
+  });
 };
 
 exports.login = async () => {
@@ -92,12 +127,6 @@ exports.login = async () => {
     });
   };
   const ret = await getParams();
-  const cookies = await win.webContents.session.cookies.get({
-    url: 'https://c.y.qq.com'
-  });
-
   win.close();
-  return Object.assign({
-    cookies
-  }, ret);
+  return ret;
 };

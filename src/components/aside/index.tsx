@@ -1,13 +1,12 @@
 import React, { FC, Fragment, useMemo } from 'react';
 import { Structure } from '../structure';
-import { StarOutlined, UserOutlined } from '@ant-design/icons';
+import { StarOutlined, UserOutlined, HomeOutlined, HeartOutlined } from '@ant-design/icons';
 import logo from '../../common/images/logo@2x.png';
 import './style.scss';
 import { Avatar } from 'antd';
 import { useUserInfo } from '../../store/reducers/user-info';
 import { combineClassNames } from '../../helpers/utils';
 import { NavLink, Link, useHistory, useLocation } from 'react-router-dom';
-import { HomeOutlined } from '@ant-design/icons';
 
 interface Props {}
 const Aside: FC<Props> = () => {
@@ -67,6 +66,12 @@ const Aside: FC<Props> = () => {
             <StarOutlined className={'prefix'} />
             <span>我的歌单</span>
           </Link>
+        </li>
+        <li>
+          <NavLink to={'/favorite'} className={'link'} activeClassName={'active'}>
+            <HeartOutlined className={'prefix'} />
+            <span>我喜欢的</span>
+          </NavLink>
         </li>
       </ul>
     </Structure>

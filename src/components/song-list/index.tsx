@@ -1,5 +1,4 @@
 import React, { FC, useCallback, useEffect, useRef } from 'react';
-import { Music } from './music';
 import './style.scss';
 import { Empty } from '../empty';
 import { useSetPlayingList } from '../player/store/actions';
@@ -10,7 +9,7 @@ import vip from '../../common/images/vip.png';
 import { ScrollY, ScrollYInstance, ScrollYProps } from '../scroll-y';
 
 interface Props {
-  list: Music[];
+  list: Song[];
   className?: string;
   onPullingUp?: ScrollYProps['onPullingUp'];
   total?: number;
@@ -22,16 +21,7 @@ const SongList: FC<Props> = (props) => {
   const scrollRef = useRef<ScrollYInstance>();
 
   const onClick = useCallback((song: Song, key: number) => {
-    setPlayingList(list.map(v => {
-      return {
-        name: v.name,
-        singer: v.singer,
-        image: v.image,
-        duration: v.duration,
-        songid: v.songid,
-        songmid: v.songmid
-      };
-    }), key);
+    setPlayingList(list, key);
   }, [list, setPlayingList]);
 
   useEffect(() => {

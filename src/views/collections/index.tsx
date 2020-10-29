@@ -9,6 +9,8 @@ import { Route, Link, useLocation } from 'react-router-dom';
 import './style.scss';
 import { CollectionDetail } from './detail';
 import { CSSTransition } from 'react-transition-group';
+import defaultCD from '../../common/images/default-cd.png';
+import { Empty } from '../../components/empty';
 
 const Collections: FC = () => {
 
@@ -85,27 +87,29 @@ const Collections: FC = () => {
           {
             loading ?
               <Loading /> :
-              <div
-                className={'cd-content'}
-              >
-                <ul className={'cd-list'}>
-                  {
-                    list.map(v => {
-                      return (
-                        <li key={v.dissid} className={'cd'}>
-                          <div className={'cover'}>
-                            <div className={'cover-wrapper'}>
-                              <img src={v.picurl || 'https://y.gtimg.cn/mediastyle/global/img/cover_playlist.png?max_age=31536000'} alt={v.title} />
+              list.length ?
+                <div
+                  className={'cd-content'}
+                >
+                  <ul className={'cd-list'}>
+                    {
+                      list.map(v => {
+                        return (
+                          <li key={v.dissid} className={'cd'}>
+                            <div className={'cover'}>
+                              <div className={'cover-wrapper'}>
+                                <img src={v.picurl || defaultCD} alt={v.title} />
+                              </div>
                             </div>
-                          </div>
-                          <Link replace className={'diss-name'} to={`/collections/${v.dissid}?title=${v.title}`}>{v.title}</Link>
-                          <div className={'listen-count'}>{v.subtitle.trim()}</div>
-                        </li>
-                      );
-                    })
-                  }
-                </ul>
-              </div>
+                            <Link replace className={'diss-name'} to={`/collections/${v.dissid}?title=${v.title}`}>{v.title}</Link>
+                            <div className={'listen-count'}>{v.subtitle.trim()}</div>
+                          </li>
+                        );
+                      })
+                    }
+                  </ul>
+                </div> :
+                <Empty/>
           }
         </div>
       </CSSTransition>

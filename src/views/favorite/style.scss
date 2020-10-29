@@ -1,0 +1,12 @@
+@import "../../common/styles/variable";
+@import "../../common/styles/mixin";
+
+.favorite-list{
+  .cd-title{
+    font-size: 18px;
+    text-align: center;
+    color: $color-chicken;
+    padding: 0 40px;
+    @include no-wrap;
+  }
+}

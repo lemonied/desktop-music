@@ -1,6 +1,7 @@
 import Home from './views/home';
 import User from './views/user';
 import Collections from './views/collections';
+import Favorite from './views/favorite';
 
 interface Route {
   path: string;
@@ -14,6 +15,11 @@ export const routes: Route[] = [{
   exact: true,
   auth: true,
   component: User
+}, {
+  path: '/favorite',
+  exact: true,
+  auth: true,
+  component: Favorite
 }, {
   path: '/collections',
   exact: false,

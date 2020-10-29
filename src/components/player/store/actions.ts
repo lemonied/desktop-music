@@ -215,6 +215,7 @@ export const useNextSong = () => {
     let index = playingList.findIndex(v => v === currentSong);
     switch (playMode) {
       case 'loop':
+        break;
       case 'sequence':
         index = (index + 1) % playingList.size;
         break;
@@ -246,6 +247,7 @@ export const usePreviousSong = () => {
         index = getRandom(index, playingList.size);
         break;
       case 'loop':
+        break;
       case 'sequence':
         index = index > 0 ?
           index - 1 :

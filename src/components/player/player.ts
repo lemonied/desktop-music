@@ -1,4 +1,7 @@
+import { VOLUME_SIZE } from './store/types';
+
 export const audioService: HTMLAudioElement = new Audio();
+audioService.volume = Number(localStorage.getItem(VOLUME_SIZE) || 1);
 
 export function audioTimeFormat(t = 0): string {
   const m = Math.round(t % 60);

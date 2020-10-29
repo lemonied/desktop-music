@@ -11,7 +11,9 @@ import {
   SET_PLAY_MODE,
   SET_LYRIC,
   SET_CURRENT_LYRIC,
-  SET_CURRENT_LYRIC_NUM, SET_VOLUME
+  SET_CURRENT_LYRIC_NUM,
+  SET_VOLUME,
+  VOLUME_SIZE
 } from './types';
 import { injectReducer } from '../../../store/core';
 import { fromJS, List, Record } from 'immutable';
@@ -25,14 +27,15 @@ interface Action {
 export type PlayModes = 'loop' | 'sequence' | 'random';
 
 export interface Song {
-  duration: number; // seconds
-  image: string; // image url
   name: string; // song name
   singer: string; // singer name
-  songid: string;
+  album: string;
+  vip: boolean;
   songmid: string;
+  songid: string;
+  duration: number; // seconds
+  image: string; // image url
   url?: string; // play url
-  like?: boolean; // like or dislike
 }
 export type SongState = Record<Song>;
 interface PlayerStatesObj {
@@ -60,7 +63,7 @@ export const defaultPlayerInfo: PlayerStates = fromJS({
   lyric: [],
   currentLyric: '',
   currentLyricNum: 0,
-  volume: 1
+  volume: Number(localStorage.getItem(VOLUME_SIZE) || 1)
 });
 
 const playerState = (state = defaultPlayerInfo, action: Action) => {
@@ -126,6 +129,9 @@ export const useDuration = (): number => {
 };
 export const usePlayMode = (): PlayModes => {
   return useSelector((state: any) => state.getIn([PLAYER_INFO, 'playMode']));
+};
+export const useVolume = (): number => {
+  return useSelector((state: any) => state.getIn([PLAYER_INFO, 'volume']));
 };
 
 
