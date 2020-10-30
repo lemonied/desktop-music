@@ -1,49 +1,18 @@
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import { Structure } from '../../components/structure';
-import { USER_INFO_EXTRA } from '../../store/types';
-import { get } from '../../helpers/http';
-import { Observable, throwError } from 'rxjs';
-import { finalize, map, tap } from 'rxjs/operators';
 import { Loading } from '../../components/loading';
 import { Route, Link, useLocation } from 'react-router-dom';
 import './style.scss';
 import { CollectionDetail } from './detail';
 import { CSSTransition } from 'react-transition-group';
-import defaultCD from '../../common/images/default-cd.png';
 import { Empty } from '../../components/empty';
+import { useCD, useCDLoading } from './store/reducers';
 
 const Collections: FC = () => {
 
-  const [loading, setLoading] = useState(true);
-  const [list, setList] = useState<any[]>([]);
+  const list = useCD();
+  const loading = useCDLoading();
   const location = useLocation();
-
-  const getList = useCallback<() => Observable<any[]>>(() => {
-    const userInfoExtra = localStorage.getItem(USER_INFO_EXTRA);
-    if (userInfoExtra) {
-      const parsed = JSON.parse(userInfoExtra);
-      return get(parsed.diss.href).pipe(
-        map(res => {
-          if (res.code === 0) {
-            return res.data.mydiss.list;
-          }
-          return [];
-        })
-      );
-    }
-    return throwError(new Error('Cant get USER_INFO_EXTRA'));
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const subscription = getList().pipe(
-      tap(res => setList(res)),
-      finalize(() => setLoading(false))
-    ).subscribe();
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [getList]);
 
   return (
     <Structure
@@ -65,7 +34,7 @@ const Collections: FC = () => {
               <CSSTransition
                 in={match !== null}
                 timeout={300}
-                classNames={'slide'}
+                classNames={'opacity'}
                 unmountOnExit
               >
                 <CollectionDetail />
@@ -87,7 +56,7 @@ const Collections: FC = () => {
           {
             loading ?
               <Loading /> :
-              list.length ?
+              list.size ?
                 <div
                   className={'cd-content'}
                 >
@@ -95,14 +64,14 @@ const Collections: FC = () => {
                     {
                       list.map(v => {
                         return (
-                          <li key={v.dissid} className={'cd'}>
+                          <li key={v.get('dissid')} className={'cd'}>
                             <div className={'cover'}>
                               <div className={'cover-wrapper'}>
-                                <img src={v.picurl || defaultCD} alt={v.title} />
+                                <img src={v.get('picurl')} alt={v.get('title')} />
                               </div>
                             </div>
-                            <Link replace className={'diss-name'} to={`/collections/${v.dissid}?title=${v.title}`}>{v.title}</Link>
-                            <div className={'listen-count'}>{v.subtitle.trim()}</div>
+                            <Link replace className={'diss-name'} to={`/collections/${v.get('dissid')}?title=${v.get('title')}`}>{v.get('title')}</Link>
+                            <div className={'listen-count'}>{v.get('subtitle')}</div>
                           </li>
                         );
                       })

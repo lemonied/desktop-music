@@ -116,12 +116,18 @@ export class Lyric {
   }
 
   togglePlay() {
-    const now = +new Date();
     if (this.state === STATE_PLAYING) {
+      const now = +new Date();
       this.stop();
       this.pauseStamp = now;
     } else {
+      this.goOn();
+    }
+  }
+  goOn() {
+    if (this.state !== STATE_PLAYING) {
       this.state = STATE_PLAYING;
+      const now = +new Date();
       this.play((this.pauseStamp || now) - (this.startStamp || now), true);
       this.pauseStamp = 0;
     }

@@ -1,4 +1,4 @@
-import { FAVORITE, FAVORITE_LOADING, SET_FAVORITE, SET_FAVORITE_LOADING } from './types';
+import { ADD_FAVORITE, DEL_FAVORITE, FAVORITE, FAVORITE_LOADING, SET_FAVORITE, SET_FAVORITE_LOADING } from './types';
 import { injectReducer } from '../../../store/core';
 import { useSelector } from 'react-redux';
 import { Song } from '../../../components/player/store/reducers';
@@ -9,13 +9,26 @@ const defaultState: FavoritesState = [];
 
 interface Action {
   type: symbol;
-  value?: Song[];
+  value?: any;
 }
 
 const favoritesState = (state = defaultState, action: Action) => {
+  let index: number;
   switch (action.type) {
     case SET_FAVORITE:
       return action.value || [];
+    case ADD_FAVORITE:
+      index = state.findIndex(v => v.songid === action.value?.songid);
+      if (index > -1) {
+        state.splice(index, 1);
+      }
+      return [action.value].concat(state);
+    case DEL_FAVORITE:
+      index = state.findIndex(v => v.songid === action.value?.songid);
+      if (index > -1) {
+        state.splice(index, 1);
+      }
+      return state.slice();
     default:
       return state;
   }

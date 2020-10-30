@@ -77,11 +77,11 @@ exports.request = (config, successFn, errorFn) => {
     const cookies = await mainInfo.win.webContents.session.cookies.get({
       url: 'https://c.y.qq.com'
     }) || [];
+    const cookiesStr = cookies.map(v => `${v.name}=${v.value}`).join('; ');
     return {
-      'cookie': cookies.map(v => `${v.name}=${v.value}`).join(';'),
+      'cookie': cookiesStr,
       'origin': 'https://y.qq.com',
       'referer': 'https://y.qq.com/',
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       'Accept-Encoding': 'gzip',
       'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
       'Cache-Control': 'no-cache',

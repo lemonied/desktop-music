@@ -12,7 +12,7 @@ import {
 } from './store/reducers';
 import { Observable, of, throwError, zip } from 'rxjs';
 import { get, post } from '../../helpers/http';
-import { catchError, concatMap, finalize } from 'rxjs/operators';
+import { concatMap, finalize } from 'rxjs/operators';
 import {
   useSetVolume,
   useSetCurrentLyric,
@@ -32,8 +32,8 @@ import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOut
 import { EventManager } from '../../helpers/event';
 import { Icon } from '../icon';
 import { VOLUME_SIZE } from './store/types';
-import { useGetFavorite, useSetFavoriteLoading } from '../../views/favorite/store/actions';
 import { useFavorites } from '../../views/favorite/store/reducers';
+import { useAddFavorite, useDelFavorite } from '../../views/favorite/store/actions';
 
 const playerEvent = new EventManager();
 
@@ -72,9 +72,9 @@ const Player: FC<PlayerProps> = function(props) {
   const playMode = usePlayMode();
   const setPlayMode = useSetPlayMode();
   const timerRef = useRef<any>();
-  const getFavorites = useGetFavorite();
   const favorites = useFavorites();
-  const setFavoriteLoading = useSetFavoriteLoading();
+  const addFavorite = useAddFavorite();
+  const delFavorite = useDelFavorite();
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
     if (currentSong) {
@@ -178,10 +178,20 @@ const Player: FC<PlayerProps> = function(props) {
   const isFavorite = useMemo(() => {
     return favorites.findIndex(v => v.songid === currentSong?.get('songid')) > -1;
   }, [currentSong, favorites]);
+  const toggleFavorite = useCallback(() => {
+    if (currentSong) {
+      if (isFavorite) {
+        delFavorite(currentSong.toJS()).subscribe();
+      } else {
+        addFavorite(currentSong.toJS()).subscribe();
+      }
+    }
+  }, [addFavorite, currentSong, delFavorite, isFavorite]);
 
   useEffect(() => {
     audioService.onplay = () => {
       setPlaying(true);
+      lyricRef.current?.goOn();
     };
     audioService.onpause = () => {
       setPlaying(false);
@@ -250,17 +260,6 @@ const Player: FC<PlayerProps> = function(props) {
     };
   }, [onError]);
 
-  useEffect(() => {
-    setFavoriteLoading(true);
-    getFavorites().pipe(
-      finalize(() => setFavoriteLoading(false)),
-      catchError(err => {
-        console.error(err);
-        return of();
-      })
-    ).subscribe();
-  }, [getFavorites, setFavoriteLoading]);
-
   if (!currentSong) {
     return null;
   }
@@ -276,44 +275,47 @@ const Player: FC<PlayerProps> = function(props) {
         </div>
       </div>
 
-      <div className={'control'}>
-        <div className={'mode'}>
-          <Icon type={playMode} className={'control-icon mode-icon'} onClick={changePlayMode} />
+      <div className={'middle'}>
+        <div className={'control'}>
+          <div className={'mode'}>
+            <Icon type={playMode} className={'control-icon mode-icon'} onClick={changePlayMode} />
+          </div>
+          <div className={'previous-song'} onClick={previous}>
+            <FastBackwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
+          </div>
+          <div
+            className={'toggle-play'}
+            onClick={togglePlay}
+          >
+            {
+              playing ?
+                <PauseOutlined className={'control-icon'} /> :
+                <CaretRightOutlined className={'control-icon'} />
+            }
+          </div>
+          <div className={'next-song'} onClick={next}>
+            <FastForwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
+          </div>
         </div>
-        <div className={'previous-song'} onClick={previous}>
-          <FastBackwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
-        </div>
-        <div
-          className={'toggle-play'}
-          onClick={togglePlay}
-        >
-          {
-            playing ?
-              <PauseOutlined className={'control-icon'} /> :
-              <CaretRightOutlined className={'control-icon'} />
-          }
-        </div>
-        <div className={'next-song'} onClick={next}>
-          <FastForwardOutlined className={combineClassNames('control-icon', loading ? 'loading' : null)} />
-        </div>
-      </div>
-      <div className={'middle'} ref={middleRef}>
-        <div className={'lyric-snapshot'} title={currentLyric}>{currentLyric}</div>
-        <div className={'progress-wrapper'}>
-          <div className={'now'}>{audioTimeFormat(now)}</div>
-          <LineProgress
-            percent={duration ? now / duration * 100 : 0}
-            className={'progress'}
-            wrapper={middleRef}
-            onChange={onProgressChange}
-          />
-          <div className={'duration'}>{audioTimeFormat(duration)}</div>
+        <div className={'lyric-progress'} ref={middleRef}>
+          <div className={'lyric-snapshot'} title={currentLyric}>{currentLyric}</div>
+          <div className={'progress-wrapper'}>
+            <div className={'now'}>{audioTimeFormat(now)}</div>
+            <LineProgress
+              percent={duration ? now / duration * 100 : 0}
+              className={'progress'}
+              wrapper={middleRef}
+              onChange={onProgressChange}
+            />
+            <div className={'duration'}>{audioTimeFormat(duration)}</div>
+          </div>
         </div>
       </div>
       <div className={'right'} ref={rightRef}>
         <Icon
           type={isFavorite ? 'favorite' : 'not-favorite'}
           className={isFavorite ? 'favorite' : 'not-favorite'}
+          onClick={toggleFavorite}
         />
         <div className={'volume'}>
           <SoundOutlined className={'volume-icon'} />

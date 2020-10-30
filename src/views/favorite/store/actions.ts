@@ -1,18 +1,28 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { getImgByMid } from '../../../components/song-list/music';
-import { SET_FAVORITE, SET_FAVORITE_LOADING } from './types';
-import { Observable, throwError } from 'rxjs';
-import { USER_INFO_EXTRA } from '../../../store/types';
-import { get, post } from '../../../helpers/http';
-import { concatMap, tap } from 'rxjs/operators';
-import { queryParse } from '../../../helpers/query';
-import { useUserInfo } from '../../../store/reducers/user-info';
+import { getImgByMid } from '../../../api';
+import { ADD_FAVORITE, DEL_FAVORITE, SET_FAVORITE, SET_FAVORITE_LOADING } from './types';
+import { Observable, of, throwError } from 'rxjs';
+import { get } from '../../../helpers/http';
+import { catchError, concatMap, tap } from 'rxjs/operators';
 import { Song } from '../../../components/player/store/reducers';
+import { addToCD, delFromCD, getUserQuery } from '../../../api';
 
 export function setFavorites(value: Song[]) {
   return {
     type: SET_FAVORITE,
+    value
+  };
+}
+export function addFavorite(value: Song) {
+  return {
+    type: ADD_FAVORITE,
+    value
+  };
+}
+export function delFavorite(value: Song) {
+  return {
+    type: DEL_FAVORITE,
     value
   };
 }
@@ -42,10 +52,13 @@ const favoriteIds: any = {
   qq: ''
 };
 export const useGetFavorite = () => {
-  const userInfo = useUserInfo();
-  const dispatch = useDispatch();
+  const setFavorite = useSetFavorite();
   return useCallback<() => Observable<any>>(() => {
-    const userInfoExtra = localStorage.getItem(USER_INFO_EXTRA);
+    const query = getUserQuery();
+    if (!query) {
+      return throwError(new Error('User not Login'));
+    }
+    const { qq, g_tk, diss } = query;
     const getList = (disstid: string, g_tk: string): Observable<any> => {
       return get('https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg', {
         type: 1,
@@ -61,7 +74,7 @@ export const useGetFavorite = () => {
         _: Date.now(),
         g_tk_new_20200303: g_tk,
         g_tk: g_tk,
-        loginUin: userInfo.get('qq'),
+        loginUin: qq,
         hostUin: 0,
         format: 'json',
         inCharset: 'utf8',
@@ -72,7 +85,7 @@ export const useGetFavorite = () => {
       }).pipe(
         tap(res => {
           if (res.code === 0) {
-            dispatch(setFavorites(res.songlist.map((item: any) => {
+            setFavorite(res.songlist.map((item: any) => {
               return {
                 name: item.name,
                 singer: item.singer?.map((v: any) => v.name).join(','),
@@ -84,67 +97,57 @@ export const useGetFavorite = () => {
                 image: getImgByMid(item.album?.mid),
                 url: item.url
               };
-            })));
+            }));
           }
         })
       );
     };
-    if (userInfoExtra && userInfo.get('status') === 1) {
-      const parsed = JSON.parse(userInfoExtra);
-      const g_tk = queryParse(parsed.loginParams.query).g_tk;
-      if (favoriteIds.dissid && favoriteIds.qq === userInfo.get('qq')) {
-        return getList(favoriteIds.dissid, g_tk);
-      } else {
-        return get(parsed.diss.href).pipe(
-          concatMap(res => {
-            if (res.code === 0) {
-              const item = res.data.mymusic.find((v: any) => v.title === '我喜欢');
-              if (item) {
-                favoriteIds.dissid = item.id;
-                favoriteIds.qq = userInfo.get('qq');
-                return getList(favoriteIds.dissid, g_tk);
-              }
-              return throwError(new Error('No Favorite CD'));
+    if (favoriteIds.dissid && favoriteIds.qq === qq) {
+      return getList(favoriteIds.dissid, g_tk);
+    } else {
+      return get(diss.href).pipe(
+        concatMap(res => {
+          if (res.code === 0) {
+            const item = res.data.mymusic.find((v: any) => v.title === '我喜欢');
+            if (item) {
+              favoriteIds.dissid = item.id;
+              favoriteIds.qq = qq;
+              return getList(favoriteIds.dissid, g_tk);
             }
-            return throwError('Get dissid Error');
-          })
-        );
-      }
+            return throwError(new Error('No Favorite CD'));
+          }
+          return throwError('Get dissid Error');
+        })
+      );
     }
-    return throwError(new Error('User Not Login'));
-  }, [dispatch, userInfo]);
+  }, [setFavorite]);
 };
 
 export const useAddFavorite = () => {
-  const userInfo = useUserInfo();
+  const dispatch = useDispatch();
   return useCallback((song: Song) => {
-    const userInfoExtra = localStorage.getItem(USER_INFO_EXTRA);
-    if (!userInfoExtra) {
-      return throwError(new Error('Not Login'));
-    }
-    const parsed = JSON.parse(userInfoExtra);
-    const g_tk = queryParse(parsed.loginParams.query).g_tk;
-    return post(`/splcloud/fcgi-bin/fcg_music_add2songdir.fcg?g_tk=${g_tk}&g_tk_new_20200303=${g_tk}`, JSON.stringify({
-      loginUin: userInfo.get('qq'),
-      hostUin: 0,
-      format: 'json',
-      inCharset: 'utf8',
-      outCharset: 'utf-8',
-      notice: 0,
-      platform: 'yqq.post',
-      needNewCode: 0,
-      uin: userInfo.get('qq'),
-      typelist: 13,
-      dirid: 201,
-      formsender: 4,
-      midlist: song.songmid,
-      source: 153,
-      r2: 0,
-      r3: 1,
-      utf8: 1,
-      g_tk
-    }), {
-      'Content-Type': 'application/json'
-    });
-  }, [userInfo]);
+    return addToCD(song.songmid, 201).pipe(
+      tap(() => {
+        dispatch(addFavorite(song));
+      }),
+      catchError(err => {
+        console.error(err);
+        return of({});
+      })
+    );
+  }, [dispatch]);
+};
+export const useDelFavorite = () => {
+  const dispatch = useDispatch();
+  return useCallback((song: Song) => {
+    return delFromCD(song.songid, 201).pipe(
+      tap(() => {
+        dispatch(delFavorite(song));
+      }),
+      catchError(err => {
+        console.error(err);
+        return of({});
+      })
+    );
+  }, [dispatch]);
 };

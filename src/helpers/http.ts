@@ -14,7 +14,9 @@ interface RequestConfig {
 
 const defaultAxiosConf: RequestConfig = {
   timeout: 15000,
-  headers: {},
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+  },
   method: 'GET'
 };
 

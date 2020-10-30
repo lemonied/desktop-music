@@ -51,7 +51,6 @@ const SongList: FC<Props> = (props) => {
                   return (
                     <li
                       key={item.songid}
-                      onClick={() => onClick(item, key)}
                       className={combineClassNames(currentSong?.get('songid') === item.songid ? 'playing' : null)}
                     >
                       {
@@ -64,7 +63,14 @@ const SongList: FC<Props> = (props) => {
                           <div className={'vip'}><img src={vip} alt="vip"/></div> :
                           null
                       }
-                      <div className={'title'} title={`${item.name} - ${item.singer}`}>{item.name} - {item.singer}</div>
+                      <div
+                        className={'title'}
+                      >
+                        <span
+                          title={`${item.name} - ${item.singer}`}
+                          onClick={() => onClick(item, key)}
+                        >{item.name} - {item.singer}</span>
+                      </div>
                     </li>
                   );
                 })

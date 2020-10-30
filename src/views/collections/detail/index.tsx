@@ -8,7 +8,7 @@ import { queryParse } from '../../../helpers/query';
 import { Observable, throwError } from 'rxjs';
 import { useUserInfo } from '../../../store/reducers/user-info';
 import { finalize, map } from 'rxjs/operators';
-import { getImgByMid } from '../../../components/song-list/music';
+import { getImgByMid } from '../../../api';
 import { SongList } from '../../../components/song-list';
 import { Loading } from '../../../components/loading';
 import { ArrowLeftOutlined } from '@ant-design/icons';
@@ -109,8 +109,10 @@ const CollectionDetail: FC = () => {
     };
   }, [getList]);
   useEffect(() => {
-    const parsed = queryParse(search);
-    setTitle(decodeURIComponent(parsed.title));
+    if (search) {
+      const parsed = queryParse(search);
+      setTitle(decodeURIComponent(parsed.title));
+    }
   }, [search]);
 
   return (

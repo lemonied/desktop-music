@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useState } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import './style.scss';
 import { get } from '../../../helpers/http';
-import { getImgByMid } from '../../../components/song-list/music';
+import { getImgByMid } from '../../../api';
 import { SongList } from '../../../components/song-list';
 import { finalize, tap } from 'rxjs/operators';
 import { Loading } from '../../../components/loading';

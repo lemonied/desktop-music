@@ -1,5 +1,7 @@
-import { Modal as AntdModal } from 'antd';
+import { Modal as AntdModal, message } from 'antd';
 import { ModalFunc } from 'antd/lib/modal/confirm';
+import { ReactNode } from 'react';
+import { MessageType } from 'antd/es/message';
 interface ModalTypes {
   info: ModalFunc;
   success: ModalFunc;
@@ -33,3 +35,15 @@ const Modal: ModalTypes = {
 } as ModalTypes;
 
 export { Modal };
+
+const Message = {
+  toast(content: ReactNode, duration = 3): MessageType {
+    return message.open({
+      type: 'info',
+      icon: null,
+      content,
+      duration
+    });
+  }
+};
+export { Message };

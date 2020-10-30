@@ -14,7 +14,10 @@ import { Loading } from './components/loading';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Player } from './components/player';
 import { useCurrentSong } from './components/player/store/reducers';
+import { Preloading } from './Preloading';
 import defaultBkg from './common/images/background.jpg';
+
+const hasSubRouter = routes.filter(v => !v.exact).map(v => v.path);
 
 const App: FC = () => {
   const refreshUserInfo = useRefreshUserInfo();
@@ -23,11 +26,11 @@ const App: FC = () => {
   const currentSong = useCurrentSong();
 
   const pathname = useMemo(() => {
-    if (/^\/\d*$/.test(location.pathname)) {
-      return '/';
+    if (/^(\/)\d+$/.test(location.pathname)) {
+      return RegExp.$1;
     }
-    if (/^\/collections\/\d*$/.test(location.pathname)) {
-      return '/collections';
+    if (new RegExp(`^(${hasSubRouter.join('|')})\\/[^\\/]+$`).test(location.pathname)) {
+      return RegExp.$1;
     }
     return location.pathname;
   }, [location]);
@@ -37,6 +40,7 @@ const App: FC = () => {
 
   return (
     <Fragment>
+      <Preloading />
       <div className={'current-mask'} style={{backgroundImage: `url(${currentSong?.get('image') || defaultBkg})`}} />
       <ConfigProvider locale={zhCN}>
         <Structure
