@@ -2,7 +2,6 @@ const { app, BrowserWindow, Tray, Menu } = require('electron');
 const path = require('path');
 const url = require('url');
 const config = require('./config');
-const colors = require('../src/styleVars');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 let tray = null;
@@ -22,7 +21,7 @@ async function createWindow () {
     resizable: false,
     icon: config.icon,
     useContentSize: true,
-    backgroundColor: colors['color-background']
+    backgroundColor: '#121212'
   });
   const contextMenu = Menu.buildFromTemplate([
     { label: config.title, type: 'normal', click: () => win.show() },

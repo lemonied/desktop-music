@@ -24,11 +24,12 @@ const favoritesState = (state = defaultState, action: Action) => {
       }
       return [action.value].concat(state);
     case DEL_FAVORITE:
-      index = state.findIndex(v => v.songid === action.value?.songid);
+      const copy = state.slice();
+      index = copy.findIndex(v => v.songid === action.value?.songid);
       if (index > -1) {
-        state.splice(index, 1);
+        copy.splice(index, 1);
       }
-      return state.slice();
+      return copy;
     default:
       return state;
   }

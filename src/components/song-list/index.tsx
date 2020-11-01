@@ -7,15 +7,18 @@ import { combineClassNames } from '../../helpers/utils';
 import wave from '../../common/images/wave.gif';
 import vip from '../../common/images/vip.png';
 import { ScrollY, ScrollYInstance, ScrollYProps } from '../scroll-y';
+import { CloseOutlined } from '@ant-design/icons';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 interface Props {
   list: Song[];
   className?: string;
   onPullingUp?: ScrollYProps['onPullingUp'];
   total?: number;
+  onDel?: (song: Song) => void;
 }
 const SongList: FC<Props> = (props) => {
-  const { list, className, total, onPullingUp } = props;
+  const { list, className, total, onPullingUp, onDel } = props;
   const setPlayingList = useSetPlayingList();
   const currentSong = useCurrentSong();
   const scrollRef = useRef<ScrollYInstance>();
@@ -46,35 +49,50 @@ const SongList: FC<Props> = (props) => {
         list.length ?
           <ScrollY ref={scrollRef} onPullingUp={onPullingUp}>
             <ul className={'songs-list'}>
-              {
-                list.map((item, key) => {
-                  return (
-                    <li
-                      key={item.songid}
-                      className={combineClassNames(currentSong?.get('songid') === item.songid ? 'playing' : null)}
-                    >
-                      {
-                        currentSong?.get('songid') === item.songid ?
-                          <div className={'wave'}><img src={wave} alt="wave"/></div> :
-                          null
-                      }
-                      {
-                        item.vip ?
-                          <div className={'vip'}><img src={vip} alt="vip"/></div> :
-                          null
-                      }
-                      <div
-                        className={'title'}
+              <TransitionGroup>
+                {
+                  list.map((item, key) => {
+                    return (
+                      <CSSTransition
+                        timeout={300}
+                        classNames={'del'}
+                        unmountOnExit
+                        key={item.songid}
                       >
-                        <span
-                          title={`${item.name} - ${item.singer}`}
-                          onClick={() => onClick(item, key)}
-                        >{item.name} - {item.singer}</span>
-                      </div>
-                    </li>
-                  );
-                })
-              }
+                        <li
+                          className={combineClassNames(currentSong?.get('songid') === item.songid ? 'playing' : null)}
+                        >
+                          {
+                            currentSong?.get('songid') === item.songid ?
+                              <div className={'wave'}><img src={wave} alt="wave"/></div> :
+                              null
+                          }
+                          {
+                            item.vip ?
+                              <div className={'vip'}><img src={vip} alt="vip"/></div> :
+                              null
+                          }
+                          <div
+                            className={'title'}
+                          >
+                            <span
+                              title={`${item.name} - ${item.singer}`}
+                              onClick={() => onClick(item, key)}
+                            >{item.name} - {item.singer}</span>
+                          </div>
+                          <div className={'operations'}>
+                            {
+                              onDel ?
+                                <CloseOutlined onClick={() => onDel(item)} /> :
+                                null
+                            }
+                          </div>
+                        </li>
+                      </CSSTransition>
+                    );
+                  })
+                }
+              </TransitionGroup>
             </ul>
           </ScrollY> :
           <Empty />

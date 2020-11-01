@@ -39,7 +39,7 @@
   },
   "scripts": {
     "start": "node develop.js --dev",
-    "open": "set NODE_ENV=development&& electron .",
+    "open": "node open.js",
     "prod": "node develop.js --prod"
   },
   "eslintConfig": {

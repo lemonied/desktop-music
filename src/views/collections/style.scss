@@ -50,6 +50,9 @@
       }
     }
   }
+  .opacity-transition {
+    transition: opacity ease 300ms;
+  }
   .opacity-enter {
     opacity: 0;
   }
@@ -57,11 +60,17 @@
     opacity: 1;
     transition: opacity ease 300ms;
   }
+  .opacity-enter-done {
+    opacity: 1;
+  }
   .opacity-exit {
     opacity: 1;
   }
   .opacity-exit-active {
     opacity: 0;
     transition: opacity ease 300ms;
+  }
+  .opacity-exit-done {
+    opacity: 0;
   }
 }

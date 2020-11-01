@@ -8,6 +8,15 @@
     *{
       transition: all ease .2s;
     }
+    .del-exit {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    .del-exit-active {
+      opacity: 0;
+      transform: translateX(-100%);
+      transition: all ease 300ms;
+    }
     li{
       color: $color-text-d;
       font-size: 14px;
@@ -49,6 +58,16 @@
         align-items: center;
         img{
           width: 100%;
+        }
+      }
+      .operations{
+        padding: 0 10px 0 0;
+        font-size: 16px;
+        svg{
+          &:hover{
+            cursor: pointer;
+            color: $color-text;
+          }
         }
       }
     }

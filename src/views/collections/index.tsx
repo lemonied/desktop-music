@@ -18,14 +18,10 @@ const Collections: FC = () => {
     <Structure
       className={'collections'}
       header={
-        <CSSTransition
-          timeout={300}
-          classNames={'opacity'}
-          in={location.pathname === '/collections'}
-          unmountOnExit
-        >
-          <h1 className={'cd-title'}>我的歌单</h1>
-        </CSSTransition>
+        <h1
+          className={'cd-title'}
+          style={{opacity: location.pathname === '/collections' ? 1 : 0}}
+        >我的歌单</h1>
       }
       extra={
         <Route path={'/collections/:id'} exact={false}>
@@ -44,44 +40,38 @@ const Collections: FC = () => {
         </Route>
       }
     >
-      <CSSTransition
-        timeout={300}
-        classNames={'opacity'}
-        in={location.pathname === '/collections'}
-        unmountOnExit
+      <div
+        style={{height: '100%', opacity: location.pathname === '/collections' ? 1 : 0}}
+        className={'opacity-transition'}
       >
-        <div
-          style={{height: '100%'}}
-        >
-          {
-            loading ?
-              <Loading /> :
-              list.size ?
-                <div
-                  className={'cd-content'}
-                >
-                  <ul className={'cd-list'}>
-                    {
-                      list.map(v => {
-                        return (
-                          <li key={v.get('dissid')} className={'cd'}>
-                            <div className={'cover'}>
-                              <div className={'cover-wrapper'}>
-                                <img src={v.get('picurl')} alt={v.get('title')} />
-                              </div>
+        {
+          loading ?
+            <Loading /> :
+            list.size ?
+              <div
+                className={'cd-content'}
+              >
+                <ul className={'cd-list'}>
+                  {
+                    list.map(v => {
+                      return (
+                        <li key={v.get('dissid')} className={'cd'}>
+                          <div className={'cover'}>
+                            <div className={'cover-wrapper'}>
+                              <img src={v.get('picurl')} alt={v.get('title')} />
                             </div>
-                            <Link replace className={'diss-name'} to={`/collections/${v.get('dissid')}?title=${v.get('title')}`}>{v.get('title')}</Link>
-                            <div className={'listen-count'}>{v.get('subtitle')}</div>
-                          </li>
-                        );
-                      })
-                    }
-                  </ul>
-                </div> :
-                <Empty/>
-          }
-        </div>
-      </CSSTransition>
+                          </div>
+                          <Link replace className={'diss-name'} to={`/collections/${v.get('dissid')}?title=${v.get('title')}`}>{v.get('title')}</Link>
+                          <div className={'listen-count'}>{v.get('subtitle')}</div>
+                        </li>
+                      );
+                    })
+                  }
+                </ul>
+              </div> :
+              <Empty/>
+        }
+      </div>
     </Structure>
   );
 };
