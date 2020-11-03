@@ -7,6 +7,7 @@ import { get } from '../../../helpers/http';
 import { catchError, concatMap, tap } from 'rxjs/operators';
 import { Song } from '../../../components/player/store/reducers';
 import { addToCD, delFromCD, getUserQuery } from '../../../api';
+import { useLogout } from '../../../store/actions/user-info';
 
 export function setFavorites(value: Song[]) {
   return {
@@ -53,6 +54,7 @@ const favoriteIds: any = {
 };
 export const useGetFavorite = () => {
   const setFavorite = useSetFavorite();
+  const logout = useLogout();
   return useCallback<() => Observable<any>>(() => {
     const query = getUserQuery();
     if (!query) {
@@ -115,12 +117,15 @@ export const useGetFavorite = () => {
               return getList(favoriteIds.dissid, g_tk);
             }
             return throwError(new Error('No Favorite CD'));
+          } else if (res.code === 1000) {
+            logout();
+            return throwError(new Error('User token expired'));
           }
           return throwError('Get dissid Error');
         })
       );
     }
-  }, [setFavorite]);
+  }, [setFavorite, logout]);
 };
 
 export const useAddFavorite = () => {

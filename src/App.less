@@ -2,7 +2,7 @@
 
 #root{
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden;
   font-size: 12px;
   position: relative;
 }
@@ -27,6 +27,22 @@
 .root-layout{
   position: relative;
   z-index: 1;
+  .root-content-middle{
+    position: relative;
+    .root-playing-wrapper{
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+  .root-content{
+    height: 100%;
+    width: 100%;
+    transition: opacity ease .3s;
+  }
+  .root-aside{
+    transition: opacity ease .3s;
+  }
 }
 .fade-enter {
   opacity: 0;
@@ -47,4 +63,7 @@
 .fade-exit-active {
   opacity: 0;
   transition: opacity ease 300ms;
+}
+.fade-exit-done {
+  opacity: 0;
 }

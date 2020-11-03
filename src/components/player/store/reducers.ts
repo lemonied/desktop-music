@@ -13,7 +13,9 @@ import {
   SET_CURRENT_LYRIC,
   SET_CURRENT_LYRIC_NUM,
   SET_VOLUME,
-  VOLUME_SIZE
+  VOLUME_SIZE,
+  SET_FULLSCREEN,
+  TOGGLE_FULLSCREEN
 } from './types';
 import { injectReducer } from '../../../store/core';
 import { fromJS, List, Record } from 'immutable';
@@ -50,6 +52,7 @@ interface PlayerStatesObj {
   currentLyric: string;
   currentLyricNum: number;
   volume: number;
+  fullscreen: boolean;
 }
 export type PlayerStates = Record<PlayerStatesObj>;
 
@@ -63,7 +66,8 @@ export const defaultPlayerInfo: PlayerStates = fromJS({
   lyric: [],
   currentLyric: '',
   currentLyricNum: 0,
-  volume: Number(localStorage.getItem(VOLUME_SIZE) || 1)
+  volume: Number(localStorage.getItem(VOLUME_SIZE) || 1),
+  fullscreen: false
 });
 
 const playerState = (state = defaultPlayerInfo, action: Action) => {
@@ -92,6 +96,10 @@ const playerState = (state = defaultPlayerInfo, action: Action) => {
       return state.set('currentLyricNum', action.value);
     case SET_VOLUME:
       return state.set('volume', action.value);
+    case SET_FULLSCREEN:
+      return state.set('fullscreen', action.value);
+    case TOGGLE_FULLSCREEN:
+      return state.set('fullscreen', !state.get('fullscreen'));
     default:
       return state;
   }
@@ -133,6 +141,8 @@ export const usePlayMode = (): PlayModes => {
 export const useVolume = (): number => {
   return useSelector((state: any) => state.getIn([PLAYER_INFO, 'volume']));
 };
-
+export const useFullscreen = (): boolean => {
+  return useSelector((state: any) => state.getIn([PLAYER_INFO, 'fullscreen']));
+};
 
 injectReducer(PLAYER_INFO, playerState);

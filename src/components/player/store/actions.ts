@@ -5,7 +5,8 @@ import {
   PlayModes,
   usePlayingList,
   useCurrentSong,
-  useCurrentSongLoading, usePlayMode
+  useCurrentSongLoading,
+  usePlayMode
 } from './reducers';
 import {
   SET_CURRENT_LYRIC,
@@ -14,11 +15,14 @@ import {
   SET_CURRENT_SONG_LOADING,
   SET_CURRENT_SONG_PLAYING,
   SET_DURATION,
+  SET_FULLSCREEN,
   SET_LYRIC,
   SET_NOW,
   SET_PLAY_MODE,
   SET_PLAYER_INFO,
-  SET_PLAYING_LIST, SET_VOLUME
+  SET_PLAYING_LIST,
+  SET_VOLUME,
+  TOGGLE_FULLSCREEN
 } from './types';
 import { useDispatch } from 'react-redux';
 import { useCallback } from 'react';
@@ -97,6 +101,15 @@ export const setVolume = (value: number) => {
     type: SET_VOLUME,
     value
   };
+};
+export const setFullscreen = (value: boolean) => {
+  return {
+    type: SET_FULLSCREEN,
+    value
+  };
+};
+export const toggleFullscreen = () => {
+  return { type: TOGGLE_FULLSCREEN };
 };
 
 export const useSetPlayerInfo = () => {
@@ -261,4 +274,20 @@ export const usePreviousSong = () => {
       setCurrentSong(index);
     }
   }, [playingList, setCurrentSong, currentSong, currentSongLoading, playMode]);
+};
+export const useSetFullscreen = () => {
+  const dispatch = useDispatch();
+  return useCallback((fullscreen: boolean) => {
+    dispatch(
+      setFullscreen(fullscreen)
+    );
+  }, [dispatch]);
+};
+export const useToggleFullscreen = () => {
+  const dispatch = useDispatch();
+  return useCallback(() => {
+    dispatch(
+      toggleFullscreen()
+    );
+  }, [dispatch]);
 };

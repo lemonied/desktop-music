@@ -1,0 +1,15 @@
+@import "../../../common/styles/variable";
+
+.full-player{
+  .lyric-list{
+    padding: 20px;
+    li{
+      padding: 5px 0;
+      color: $color-text-d;
+      text-align: center;
+      &.active{
+        color: $color-text;
+      }
+    }
+  }
+}

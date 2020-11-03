@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from 'react';
+import React, { CSSProperties, FC, ReactNode } from 'react';
 import './style.scss';
 import { combineClassNames } from '../../helpers/utils';
 
@@ -8,6 +8,8 @@ interface Props {
   footer?: ReactNode;
   extra?: ReactNode;
   className?: string;
+  contentClassName?: string;
+  style?: CSSProperties;
 }
 
 const Structure: FC<Props> = (props) => {
@@ -17,17 +19,19 @@ const Structure: FC<Props> = (props) => {
     slider,
     footer,
     extra,
-    className
+    className,
+    contentClassName,
+    style
   } = props;
 
   return (
-    <section className={combineClassNames(className, 'structure')}>
+    <section className={combineClassNames(className, 'structure')} style={style}>
       {
         header ?
           <header>{ header }</header> :
           null
       }
-      <section className={'content-middle'}>
+      <section className={combineClassNames('content-middle', contentClassName)}>
         {
           slider ?
             <aside>{ slider }</aside> :

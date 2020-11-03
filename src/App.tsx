@@ -13,9 +13,10 @@ import { NotCertified } from './components/not-certified';
 import { Loading } from './components/loading';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Player } from './components/player';
-import { useCurrentSong } from './components/player/store/reducers';
+import { useCurrentSong, useFullscreen } from './components/player/store/reducers';
 import { Preloading } from './Preloading';
 import defaultBkg from './common/images/background.jpg';
+import { PlayingList } from './components/playing-list';
 
 const hasSubRouter = routes.filter(v => !v.exact).map(v => v.path);
 
@@ -24,6 +25,7 @@ const App: FC = () => {
   const userInfo = useUserInfo();
   const location = useLocation();
   const currentSong = useCurrentSong();
+  const fullscreen = useFullscreen();
 
   const pathname = useMemo(() => {
     if (/^(\/)\d+$/.test(location.pathname)) {
@@ -45,49 +47,61 @@ const App: FC = () => {
       <ConfigProvider locale={zhCN}>
         <Structure
           className={'root-layout'}
+          contentClassName={'root-content-middle'}
           header={<Header />}
           slider={
             userInfo.get('status') === -1 ?
               null :
-              <Aside />
+              <Aside className={'root-aside'} style={{opacity: fullscreen ? 0 : 1}} />
           }
           footer={<Player />}
         >
-          {
-            userInfo.get('status') === -1 ?
-              <Loading /> :
-              <TransitionGroup
-                className={'root-routes-group'}
-              >
-                <CSSTransition
-                  key={pathname}
-                  classNames={'fade'}
-                  timeout={300}
+          <div className={'root-content'} style={{opacity: fullscreen ? 0 : 1}}>
+            {
+              userInfo.get('status') === -1 ?
+                <Loading /> :
+                <TransitionGroup
+                  className={'root-routes-group'}
                 >
-                  <div style={{ height: '100%', width: '100%', overflowY: 'auto' }}>
-                    <Switch location={location}>
-                      {
-                        routes.map(Item => (
-                          <Route
-                            exact={Item.exact}
-                            path={Item.path}
-                            key={Item.path}
-                            render={routeProps => {
-                              if (userInfo.get('status') !== 1 && Item.auth) {
-                                return (
-                                  <NotCertified />
-                                );
-                              }
-                              return <Item.component />;
-                            }}
-                          />
-                        ))
-                      }
-                    </Switch>
-                  </div>
-                </CSSTransition>
-              </TransitionGroup>
-          }
+                  <CSSTransition
+                    key={pathname}
+                    classNames={'fade'}
+                    timeout={300}
+                  >
+                    <div style={{ height: '100%', width: '100%', overflowY: 'auto' }}>
+                      <Switch location={location}>
+                        {
+                          routes.map(Item => (
+                            <Route
+                              exact={Item.exact}
+                              path={Item.path}
+                              key={Item.path}
+                              render={routeProps => {
+                                if (userInfo.get('status') !== 1 && Item.auth) {
+                                  return (
+                                    <NotCertified />
+                                  );
+                                }
+                                return <Item.component />;
+                              }}
+                            />
+                          ))
+                        }
+                      </Switch>
+                    </div>
+                  </CSSTransition>
+                </TransitionGroup>
+            }
+          </div>
+          <CSSTransition
+            key={'current-song'}
+            timeout={300}
+            in={fullscreen}
+            classNames={'fade'}
+            unmountOnExit
+          >
+            <PlayingList className={'root-playing-wrapper'} />
+          </CSSTransition>
         </Structure>
       </ConfigProvider>
     </Fragment>

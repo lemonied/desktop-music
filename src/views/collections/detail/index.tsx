@@ -2,7 +2,7 @@ import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { Structure } from '../../../components/structure';
 import './style.scss';
 import { get } from '../../../helpers/http';
-import { useRouteMatch, useLocation, Link } from 'react-router-dom';
+import { useRouteMatch, Link } from 'react-router-dom';
 import { USER_INFO_EXTRA } from '../../../store/types';
 import { queryParse } from '../../../helpers/query';
 import { Observable, throwError } from 'rxjs';
@@ -13,12 +13,12 @@ import { SongList } from '../../../components/song-list';
 import { Loading } from '../../../components/loading';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Song } from '../../../components/player/store/reducers';
+import { useQuery } from '../../../hook/common';
 
 const PAGE_NUM = 50;
 
 const CollectionDetail: FC = () => {
   const match = useRouteMatch<{id: string}>();
-  const location = useLocation();
   const useInfo = useUserInfo();
   const queryRef = useRef({
     song_begin: 0,
@@ -30,7 +30,7 @@ const CollectionDetail: FC = () => {
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
   const id = match?.params?.id;
-  const search = location.search;
+  const query = useQuery();
 
   const getList = useCallback<() => Observable<Song[]>>(() => {
     const storage = localStorage.getItem(USER_INFO_EXTRA);
@@ -109,11 +109,10 @@ const CollectionDetail: FC = () => {
     };
   }, [getList]);
   useEffect(() => {
-    if (search) {
-      const parsed = queryParse(search);
-      setTitle(decodeURIComponent(parsed.title));
+    if (query.title) {
+      setTitle(decodeURIComponent(query.title));
     }
-  }, [search]);
+  }, [query]);
 
   return (
     <Structure

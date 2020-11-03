@@ -22,7 +22,9 @@ import {
   useSetLyric,
   useSetNow,
   usePreviousSong,
-  useNextSong, useSetPlayMode
+  useNextSong,
+  useSetPlayMode,
+  useToggleFullscreen
 } from './store/actions';
 import { Lyric } from './lyric';
 import { audioService, audioTimeFormat } from './player';
@@ -75,6 +77,7 @@ const Player: FC<PlayerProps> = function(props) {
   const favorites = useFavorites();
   const addFavorite = useAddFavorite();
   const delFavorite = useDelFavorite();
+  const toggleFullscreen = useToggleFullscreen();
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
     if (currentSong) {
@@ -265,7 +268,7 @@ const Player: FC<PlayerProps> = function(props) {
   }
   return (
     <div className={combineClassNames('mini-player', className)}>
-      <div className={'play-info'}>
+      <div className={'play-info'} onClick={toggleFullscreen}>
         <div className={combineClassNames('img', 'play', playing ? null : 'pause')}>
           <img src={currentSong.get('image')} alt={currentSong.get('name')}/>
         </div>

@@ -1,4 +1,4 @@
-import React, { FC, Fragment, useMemo } from 'react';
+import React, { CSSProperties, FC, Fragment, useMemo } from 'react';
 import { Structure } from '../structure';
 import { StarOutlined, UserOutlined, HomeOutlined, HeartOutlined } from '@ant-design/icons';
 import logo from '../../common/images/logo@2x.png';
@@ -8,8 +8,12 @@ import { useUserInfo } from '../../store/reducers/user-info';
 import { combineClassNames } from '../../helpers/utils';
 import { NavLink, Link, useHistory, useLocation } from 'react-router-dom';
 
-interface Props {}
-const Aside: FC<Props> = () => {
+interface Props {
+  className?: string;
+  style?: CSSProperties;
+}
+const Aside: FC<Props> = (props) => {
+  const { className, style } = props;
   const userInfo = useUserInfo();
   const history = useHistory();
   const location = useLocation();
@@ -24,7 +28,8 @@ const Aside: FC<Props> = () => {
 
   return (
     <Structure
-      className={'aside'}
+      className={combineClassNames('aside', className)}
+      style={style}
       header={
         <div className={'logo'} onClick={() => history.replace('/')}>
           <img src={logo} alt="logo"/>

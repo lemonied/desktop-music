@@ -13,4 +13,6 @@ export const SET_NOW = Symbol('SET_NOW');
 export const SET_DURATION = Symbol('SET_DURATION');
 export const SET_PLAY_MODE = Symbol('SET_PLAY_MODE');
 export const SET_VOLUME = Symbol('SET_VOLUME');
+export const SET_FULLSCREEN = Symbol('SET_FULLSCREEN');
+export const TOGGLE_FULLSCREEN = Symbol('TOGGLE_FULLSCREEN');
 export const VOLUME_SIZE = 'VOLUME_SIZE';

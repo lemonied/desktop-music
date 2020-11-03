@@ -1,0 +1,23 @@
+@import "../../common/styles/variable";
+
+.playing-list-header{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  .exit-fullscreen{
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    color: $color-chicken;
+    font-size: 24px;
+    &:hover{
+      cursor: pointer;
+    }
+  }
+  h1{
+    font-size: 20px;
+    color: $color-chicken;
+  }
+}
