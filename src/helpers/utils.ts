@@ -70,12 +70,12 @@ export function lightCompare(o1: any, o2: any): boolean {
 }
 
 export function debounce(func: (args?: any) => any, delay = 300) {
-  let timer: any;
+  let timer: number;
   return (...args: any[]) => {
     if (timer) {
-      clearTimeout(timer);
+      window.clearTimeout(timer);
     }
-    timer = setTimeout(() => {
+    timer = window.setTimeout(() => {
       func(...args);
     }, delay);
   };

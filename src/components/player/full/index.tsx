@@ -18,6 +18,10 @@ const FullLyric: FC = () => {
     }
   }, [lyricNum]);
 
+  useEffect(() => {
+    scroll.current?.refresh();
+  }, [lyric]);
+
   return (
     <Structure
       className={'full-player'}

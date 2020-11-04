@@ -1,5 +1,5 @@
 module.exports = [{
-  value: '#40a9ff',
+  value: '#006d75',
   scss: ['primary-color'],
   less: ['primary-color']
 }, {

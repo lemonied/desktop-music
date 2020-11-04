@@ -16,16 +16,21 @@ interface Props {
   onPullingUp?: ScrollYProps['onPullingUp'];
   total?: number;
   onDel?: (song: Song) => void;
+  onClick?: (song: Song, index: number) => void;
 }
 const SongList: FC<Props> = (props) => {
-  const { list, className, total, onPullingUp, onDel } = props;
+  const { list, className, total, onPullingUp, onDel, onClick } = props;
   const setPlayingList = useSetPlayingList();
   const currentSong = useCurrentSong();
   const scrollRef = useRef<ScrollYInstance>();
 
-  const onClick = useCallback((song: Song, key: number) => {
-    setPlayingList(list, key);
-  }, [list, setPlayingList]);
+  const onSongClick = useCallback((song: Song, key: number) => {
+    if (onClick) {
+      onClick(song, key);
+    } else {
+      setPlayingList(list, key);
+    }
+  }, [list, setPlayingList, onClick]);
 
   useEffect(() => {
     let timer: any;
@@ -77,7 +82,7 @@ const SongList: FC<Props> = (props) => {
                           >
                             <span
                               title={`${item.name} - ${item.singer}`}
-                              onClick={() => onClick(item, key)}
+                              onClick={() => onSongClick(item, key)}
                             >{item.name} - {item.singer}</span>
                           </div>
                           <div className={'operations'}>

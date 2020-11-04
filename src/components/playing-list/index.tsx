@@ -1,11 +1,11 @@
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import { Structure } from '../structure';
 import { FullLyric } from '../player/full';
 import { FullscreenExitOutlined } from '@ant-design/icons';
 import './style.scss';
-import { useCurrentSong } from '../player/store/reducers';
 import { useSetFullscreen } from '../player/store/actions';
 import { combineClassNames } from '../../helpers/utils';
+import { Radio } from 'antd';
 
 interface Props {
   className?: string;
@@ -13,8 +13,8 @@ interface Props {
 
 const PlayingList: FC<Props> = (props) => {
   const { className } = props;
-  const currentSong = useCurrentSong();
   const setFullscreen = useSetFullscreen();
+  const [ currentTab, setCurrentTab ] = useState<'playing-list' | 'current-song'>('playing-list');
 
   return (
     <Structure
@@ -26,11 +26,20 @@ const PlayingList: FC<Props> = (props) => {
             className={'exit-fullscreen'}
             onClick={() => setFullscreen(false)}
           />
-          <h1>{ currentSong?.get('name') }</h1>
+          <Radio.Group
+            buttonStyle="solid"
+            value={currentTab}
+            onChange={e => setCurrentTab(e.target.value)}
+          >
+            <Radio.Button value={'playing-list'}>播放列表</Radio.Button>
+            <Radio.Button value={'current-song'}>正在播放</Radio.Button>
+          </Radio.Group>
         </div>
       }
     >
-      <FullLyric />
+      <div className={'playing-list-wrapper'}>
+        <FullLyric />
+      </div>
     </Structure>
   );
 };
