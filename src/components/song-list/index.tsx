@@ -15,14 +15,17 @@ interface Props {
   className?: string;
   onPullingUp?: ScrollYProps['onPullingUp'];
   total?: number;
-  onDel?: (song: Song) => void;
+  onDel?: (song: Song, index: number) => void;
   onClick?: (song: Song, index: number) => void;
+  rollToActive?: boolean;
 }
 const SongList: FC<Props> = (props) => {
-  const { list, className, total, onPullingUp, onDel, onClick } = props;
+  const { list, className, total, onPullingUp, onDel, onClick, rollToActive = false } = props;
   const setPlayingList = useSetPlayingList();
   const currentSong = useCurrentSong();
   const scrollRef = useRef<ScrollYInstance>();
+  const listRef = useRef<HTMLUListElement>(null);
+  const initRef = useRef({ list, currentSong, rollToActive });
 
   const onSongClick = useCallback((song: Song, key: number) => {
     if (onClick) {
@@ -48,12 +51,22 @@ const SongList: FC<Props> = (props) => {
     };
   }, [list, total]);
 
+  useEffect(() => {
+    const index = initRef.current.list.findIndex(v => v.songid === initRef.current.currentSong?.get('songid'));
+    if (initRef.current.rollToActive && index > -1) {
+      const li =  listRef.current?.getElementsByTagName('li')[index];
+      if (li) {
+        scrollRef.current?.scrollToElement(li, 0, false, 0);
+      }
+    }
+  }, []);
+
   return (
     <div className={combineClassNames('songs-list-wrapper', className)}>
       {
         list.length ?
           <ScrollY ref={scrollRef} onPullingUp={onPullingUp}>
-            <ul className={'songs-list'}>
+            <ul className={'songs-list'} ref={listRef}>
               <TransitionGroup>
                 {
                   list.map((item, key) => {
@@ -88,7 +101,7 @@ const SongList: FC<Props> = (props) => {
                           <div className={'operations'}>
                             {
                               onDel ?
-                                <CloseOutlined onClick={() => onDel(item)} /> :
+                                <CloseOutlined onClick={() => onDel(item, key)} /> :
                                 null
                             }
                           </div>

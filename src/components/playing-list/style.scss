@@ -18,6 +18,10 @@
   }
 }
 .playing-list-wrapper{
-  padding: 10px 0;
+  padding: 10px 50px;
   height: 100%;
+  .group-wrapper{
+    position: relative;
+    height: 100%;
+  }
 }

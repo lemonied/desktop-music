@@ -10,11 +10,13 @@ const FullLyric: FC = () => {
   const ulRef = useRef<HTMLUListElement>(null);
   const scroll = useRef<ScrollYInstance>();
   const lyricNum = useCurrentLyricNum();
+  const firstRef = useRef(true);
 
   useEffect(() => {
     const li =  ulRef.current?.getElementsByTagName('li')[lyricNum];
     if (li) {
-      scroll.current?.scrollToElement(li, 1000, false, true);
+      scroll.current?.scrollToElement(li, firstRef.current ? 0 : 1000, false, true);
+      firstRef.current = false;
     }
   }, [lyricNum]);
 

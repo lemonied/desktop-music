@@ -96,6 +96,10 @@
         color: $color-text-d;
         height: 20px;
         text-align: center;
+        -webkit-user-select: none;
+        &:hover{
+          cursor: pointer;
+        }
       }
       .progress-wrapper{
         display: flex;

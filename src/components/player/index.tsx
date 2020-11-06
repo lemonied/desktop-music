@@ -8,7 +8,8 @@ import {
   useCurrentSongPlaying,
   useDuration,
   useNow,
-  usePlayMode, useVolume
+  usePlayMode,
+  useVolume
 } from './store/reducers';
 import { Observable, of, throwError, zip } from 'rxjs';
 import { get, post } from '../../helpers/http';
@@ -24,7 +25,7 @@ import {
   usePreviousSong,
   useNextSong,
   useSetPlayMode,
-  useToggleFullscreen
+  useSetFullscreen
 } from './store/actions';
 import { Lyric } from './lyric';
 import { audioService, audioTimeFormat } from './player';
@@ -36,6 +37,7 @@ import { Icon } from '../icon';
 import { VOLUME_SIZE } from './store/types';
 import { useFavorites } from '../../views/favorite/store/reducers';
 import { useAddFavorite, useDelFavorite } from '../../views/favorite/store/actions';
+import { useSetCurrentTab } from '../playing-list/store/actions';
 
 const playerEvent = new EventManager();
 
@@ -77,7 +79,8 @@ const Player: FC<PlayerProps> = function(props) {
   const favorites = useFavorites();
   const addFavorite = useAddFavorite();
   const delFavorite = useDelFavorite();
-  const toggleFullscreen = useToggleFullscreen();
+  const setFullscreen = useSetFullscreen();
+  const setCurrentTab = useSetCurrentTab();
 
   const getPlayInfo = useCallback<() => Observable<[string, string]>>(() => {
     if (currentSong) {
@@ -190,6 +193,10 @@ const Player: FC<PlayerProps> = function(props) {
       }
     }
   }, [addFavorite, currentSong, delFavorite, isFavorite]);
+  const toggleFull = useCallback((tab: 0 | 1) => {
+    setFullscreen(true);
+    setCurrentTab(tab);
+  }, [setCurrentTab, setFullscreen]);
 
   useEffect(() => {
     audioService.onplay = () => {
@@ -268,7 +275,7 @@ const Player: FC<PlayerProps> = function(props) {
   }
   return (
     <div className={combineClassNames('mini-player', className)}>
-      <div className={'play-info'} onClick={toggleFullscreen}>
+      <div className={'play-info'} onClick={() => toggleFull(0)}>
         <div className={combineClassNames('img', 'play', playing ? null : 'pause')}>
           <img src={currentSong.get('image')} alt={currentSong.get('name')}/>
         </div>
@@ -301,7 +308,7 @@ const Player: FC<PlayerProps> = function(props) {
           </div>
         </div>
         <div className={'lyric-progress'} ref={middleRef}>
-          <div className={'lyric-snapshot'} title={currentLyric}>{currentLyric}</div>
+          <div className={'lyric-snapshot'} title={currentLyric} onClick={() => toggleFull(1)}>{currentLyric}</div>
           <div className={'progress-wrapper'}>
             <div className={'now'}>{audioTimeFormat(now)}</div>
             <LineProgress
