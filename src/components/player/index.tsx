@@ -35,8 +35,7 @@ import { FastBackwardOutlined, FastForwardOutlined, CaretRightOutlined, PauseOut
 import { EventManager } from '../../helpers/event';
 import { Icon } from '../icon';
 import { VOLUME_SIZE } from './store/types';
-import { useFavorites } from '../../views/favorite/store/reducers';
-import { useAddFavorite, useDelFavorite } from '../../views/favorite/store/actions';
+import { favorites as favoriteStore } from '../../views/favorite/store';
 import { useSetCurrentTab } from '../playing-list/store/actions';
 
 const playerEvent = new EventManager();
@@ -76,9 +75,7 @@ const Player: FC<PlayerProps> = function(props) {
   const playMode = usePlayMode();
   const setPlayMode = useSetPlayMode();
   const timerRef = useRef<any>();
-  const favorites = useFavorites();
-  const addFavorite = useAddFavorite();
-  const delFavorite = useDelFavorite();
+  const favorites = favoriteStore.use();
   const setFullscreen = useSetFullscreen();
   const setCurrentTab = useSetCurrentTab();
 
@@ -187,12 +184,12 @@ const Player: FC<PlayerProps> = function(props) {
   const toggleFavorite = useCallback(() => {
     if (currentSong) {
       if (isFavorite) {
-        delFavorite(currentSong.toJS()).subscribe();
+        favoriteStore.delFavorite(currentSong.toJS()).subscribe();
       } else {
-        addFavorite(currentSong.toJS()).subscribe();
+        favoriteStore.addFavorite(currentSong.toJS()).subscribe();
       }
     }
-  }, [addFavorite, currentSong, delFavorite, isFavorite]);
+  }, [currentSong, isFavorite]);
   const toggleFull = useCallback((tab: 0 | 1) => {
     setFullscreen(true);
     setCurrentTab(tab);

@@ -4,7 +4,7 @@ import { StarOutlined, UserOutlined, HomeOutlined, HeartOutlined } from '@ant-de
 import logo from '../../common/images/logo@2x.png';
 import './style.scss';
 import { Avatar } from 'antd';
-import { useUserInfo } from '../../store/reducers/user-info';
+import { userInfo as userInfoStore } from '../../store/user-info';
 import { combineClassNames } from '../../helpers/utils';
 import { NavLink, Link, useHistory, useLocation } from 'react-router-dom';
 
@@ -14,7 +14,7 @@ interface Props {
 }
 const Aside: FC<Props> = (props) => {
   const { className, style } = props;
-  const userInfo = useUserInfo();
+  const userInfo = userInfoStore.use();
   const history = useHistory();
   const location = useLocation();
 

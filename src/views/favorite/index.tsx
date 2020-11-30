@@ -1,20 +1,18 @@
 import React, { FC, useCallback } from 'react';
 import { Structure } from '../../components/structure';
-import { useFavoriteLoading, useFavorites } from './store/reducers';
+import { favorites, favoriteLoading } from './store';
 import { SongList } from '../../components/song-list';
 import './style.scss';
 import { Loading } from '../../components/loading';
 import { Song } from '../../components/player/store/reducers';
-import { useDelFavorite } from './store/actions';
 
 const Favorite: FC = () => {
-  const favorites = useFavorites();
-  const loading = useFavoriteLoading();
-  const delFavorite = useDelFavorite();
+  const list = favorites.use();
+  const loading = favoriteLoading.use();
 
   const onDel = useCallback((song: Song) => {
-    delFavorite(song).subscribe();
-  }, [delFavorite]);
+    favorites.delFavorite(song).subscribe();
+  }, []);
 
   return (
     <Structure
@@ -26,7 +24,7 @@ const Favorite: FC = () => {
       {
         loading ?
           <Loading /> :
-          <SongList list={favorites} onDel={onDel} />
+          <SongList list={list} onDel={onDel} />
       }
     </Structure>
   );

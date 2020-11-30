@@ -1,8 +1,7 @@
 import React, { FC, useCallback } from 'react';
-import { useUserInfo } from '../../store/reducers/user-info';
+import { userInfo as userInfoStore } from '../../store/user-info';
 import { Avatar, Button } from 'antd';
 import './style.scss';
-import { useLogout } from '../../store/actions/user-info';
 import { LogoutOutlined } from '@ant-design/icons';
 import { useHistory } from 'react-router-dom';
 import { Modal } from '../../helpers/modal';
@@ -10,19 +9,18 @@ import { Content } from '../../components/content';
 
 interface Props {}
 const User: FC<Props> = () => {
-  const userInfo = useUserInfo();
-  const logout = useLogout();
+  const userInfo = userInfoStore.use();
   const history = useHistory();
 
   const confirmLogout = useCallback(() => {
     Modal.confirm({
       content: '确定注销登录？',
       onOk() {
-        logout();
+        userInfoStore.logout();
         history.push('/');
       }
     });
-  }, [logout, history]);
+  }, [history]);
 
   return (
     <Content className={'user-center'}>

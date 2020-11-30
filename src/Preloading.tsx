@@ -1,48 +1,29 @@
 import { FC, useEffect } from 'react';
-import { catchError, finalize } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { useSetFavoriteLoading, useGetFavorite, useSetFavorite } from './views/favorite/store/actions';
-import { useGetCD, useSetCD, useSetCDLoading } from './views/collections/store/actions';
-import { useUserInfo } from './store/reducers/user-info';
+import { finalize } from 'rxjs/operators';
+import { favorites, favoriteLoading } from './views/favorite/store';
+import { cd, cdLoading } from './views/collections/store';
+import { userInfo as userInfoStore } from './store/user-info';
 
 const Preloading: FC = () => {
-  const getFavorites = useGetFavorite();
-  const setFavoriteLoading = useSetFavoriteLoading();
-  const getCD = useGetCD();
-  const setCDLoading = useSetCDLoading();
-  const userInfo = useUserInfo();
-  const setFavorites = useSetFavorite();
-  const setCD = useSetCD();
+  const userInfo = userInfoStore.use();
 
   useEffect(() => {
     if (userInfo.get('status') === 1) {
-      setFavoriteLoading(true);
-      getFavorites().pipe(
-        finalize(() => setFavoriteLoading(false)),
-        catchError(err => {
-          console.error(err);
-          return of({});
-        })
+      favoriteLoading.set(true);
+      favorites.getFavorites().pipe(
+        finalize(() => favoriteLoading.set(false))
       ).subscribe();
-    } else {
-      setFavorites([]);
     }
-  }, [getFavorites, setFavoriteLoading, setFavorites, userInfo]);
+  }, [userInfo]);
   
   useEffect(() => {
     if (userInfo.get('status') === 1) {
-      setCDLoading(true);
-      getCD().pipe(
-        finalize(() => setCDLoading(false)),
-        catchError(err => {
-          console.error(err);
-          return of({});
-        })
+      cdLoading.set(true);
+      cd.getCD().pipe(
+        finalize(() => cdLoading.set(false))
       ).subscribe();
-    } else {
-      setCD([]);
     }
-  }, [getCD, setCD, setCDLoading, userInfo]);
+  }, [userInfo]);
   
   return null;
 };

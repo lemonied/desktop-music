@@ -6,12 +6,12 @@ import './style.scss';
 import { CollectionDetail } from './detail';
 import { CSSTransition } from 'react-transition-group';
 import { Empty } from '../../components/empty';
-import { useCD, useCDLoading } from './store/reducers';
+import { cd, cdLoading } from './store';
 
 const Collections: FC = () => {
 
-  const list = useCD();
-  const loading = useCDLoading();
+  const list = cd.use();
+  const loading = cdLoading.use();
   const location = useLocation();
 
   return (

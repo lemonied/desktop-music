@@ -1,4 +1,4 @@
-import { USER_INFO_EXTRA } from '../store/types';
+import { USER_INFO_EXTRA } from '../store/user-info';
 import { Observable, of, throwError } from 'rxjs';
 import { queryParse } from '../helpers/query';
 import { post } from '../helpers/http';

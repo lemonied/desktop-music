@@ -4,8 +4,7 @@ import { routes } from './routes';
 import './App.less';
 import { Structure } from './components/structure';
 import { Header } from './components/header';
-import { useRefreshUserInfo } from './store/actions/user-info';
-import { useUserInfo } from './store/reducers/user-info';
+import { userInfo as userInfoStore } from './store/user-info';
 import { ConfigProvider } from 'antd';
 import { Aside } from './components/aside';
 import zhCN from 'antd/es/locale/zh_CN';
@@ -21,8 +20,7 @@ import { PlayingList } from './components/playing-list';
 const hasSubRouter = routes.filter(v => !v.exact).map(v => v.path);
 
 const App: FC = () => {
-  const refreshUserInfo = useRefreshUserInfo();
-  const userInfo = useUserInfo();
+  const userInfo = userInfoStore.use();
   const location = useLocation();
   const currentSong = useCurrentSong();
   const fullscreen = useFullscreen();
@@ -37,8 +35,8 @@ const App: FC = () => {
     return location.pathname;
   }, [location]);
   useEffect(() => {
-    refreshUserInfo();
-  }, [refreshUserInfo]);
+    userInfoStore.pullUserInfo().subscribe();
+  }, []);
 
   return (
     <Fragment>

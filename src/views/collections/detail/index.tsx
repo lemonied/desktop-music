@@ -3,10 +3,9 @@ import { Structure } from '../../../components/structure';
 import './style.scss';
 import { get } from '../../../helpers/http';
 import { useRouteMatch, Link } from 'react-router-dom';
-import { USER_INFO_EXTRA } from '../../../store/types';
 import { queryParse } from '../../../helpers/query';
 import { Observable, throwError } from 'rxjs';
-import { useUserInfo } from '../../../store/reducers/user-info';
+import { userInfo, USER_INFO_EXTRA } from '../../../store/user-info';
 import { finalize, map } from 'rxjs/operators';
 import { getImgByMid } from '../../../api';
 import { SongList } from '../../../components/song-list';
@@ -19,7 +18,7 @@ const PAGE_NUM = 50;
 
 const CollectionDetail: FC = () => {
   const match = useRouteMatch<{id: string}>();
-  const useInfo = useUserInfo();
+  const user = userInfo.use();
   const queryRef = useRef({
     song_begin: 0,
     song_num: PAGE_NUM,
@@ -50,7 +49,7 @@ const CollectionDetail: FC = () => {
         _: Date.now(),
         g_tk_new_20200303: parsed.g_tk,
         g_tk: parsed.g_tk,
-        loginUin: useInfo.get('qq'),
+        loginUin: user.get('qq'),
         hostUin: 0,
         format: 'json',
         inCharset: 'utf8',
@@ -82,7 +81,7 @@ const CollectionDetail: FC = () => {
       );
     }
     return throwError(new Error('Prams parsed error'));
-  }, [id, useInfo]);
+  }, [id, user]);
   const onPullingUp = useCallback(() => {
     const old = Object.assign({}, queryRef.current);
     queryRef.current.song_num += PAGE_NUM;
