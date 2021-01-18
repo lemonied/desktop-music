@@ -24,6 +24,7 @@ export const injectReducer = (key: string, reducer: Reducer) => {
 
 const stateKey = Symbol('name');
 const actionKey = Symbol('action');
+// function must return an Observable
 export const Boom = (target: any, name: string, descriptor: PropertyDescriptor) => {
   const value = target[name];
   if (typeof value !== 'function') {
