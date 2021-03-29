@@ -31,11 +31,12 @@ module.exports = {
     sass: {
       loaderOptions: (sassLoaderOptions, { env, paths }) => {
         Object.assign(sassLoaderOptions, {
-          prependData: styleVars.map(item => {
+          additionalData: styleVars.map(item => {
             return item.scss.map(v => {
               return `$${v}: ${item.value};`;
             });
-          }).join('')
+          }).join(''),
+          implementation: require('sass'),
         });
         return sassLoaderOptions;
       }

@@ -67,6 +67,7 @@ export class Spells<S> {
     return this.store.getState().get((this as any)[stateKey]);
   }
   use(): S {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     return useSelector((state: any) => state.get((this as any)[stateKey]));
   }
   set(value: S) {

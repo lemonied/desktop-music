@@ -49,7 +49,7 @@ export const useScrollY = (): ScrollYInstance => {
 */
 export interface ScrollYProps {
   probeType?: 1 | 2 | 3;
-  onScroll?: (position: Position) => void;
+  onScroll?: (position: any) => void;
   onPullingUp?: () => void;
   style?: CSSProperties;
   scroll?: { [prop: string]: any };

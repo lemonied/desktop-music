@@ -80,6 +80,7 @@ const App: FC = () => {
                                     <NotCertified />
                                   );
                                 }
+                                // eslint-disable-next-line react/jsx-pascal-case
                                 return <Item.component />;
                               }}
                             />

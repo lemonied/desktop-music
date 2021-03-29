@@ -13,7 +13,7 @@ const NotCertified: FC<Props> = () => {
       content={
         <Fragment>
           <span>尚未登录，请</span>
-          <Button type="link" onClick={userInfo.login}>登录</Button>
+          <Button type="link" onClick={userInfo.login.bind(userInfo)}>登录</Button>
           <span>后访问</span>
         </Fragment>
       }
